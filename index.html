@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Investment Desk Pro</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="Trading platform navigation">
+      <div class="brand">
+        <span class="brand-mark">ID</span>
+        <div>
+          <strong>Investment Desk Pro</strong>
+          <small>Multi-asset trading intelligence</small>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <a class="active" href="#overview">Overview</a>
+        <a href="#market-map">Markets</a>
+        <a href="#technicals">Technicals</a>
+        <a href="#holdings">Portfolio</a>
+        <a href="#watchlist">Signals</a>
+        <a href="#risk">Risk</a>
+      </nav>
+
+      <div class="market-note">
+        <span>Desk stance</span>
+        <strong>Selective risk-on</strong>
+        <small>Momentum breadth is improving, but rates and dollar strength keep position sizing disciplined.</small>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Professional trading dashboard</p>
+          <h1>Global Market Command Center</h1>
+        </div>
+        <div class="actions">
+          <button class="icon-button" aria-label="Download report" title="Download report">↓</button>
+          <button class="primary-button">Run Rebalance</button>
+        </div>
+      </header>
+
+      <section class="kpi-grid" id="overview" aria-label="Portfolio and market summary">
+        <article class="kpi">
+          <span>Net portfolio value</span>
+          <strong>$428,940</strong>
+          <small class="positive">+$12,480 this month</small>
+        </article>
+        <article class="kpi">
+          <span>One-day P/L</span>
+          <strong>+1.34%</strong>
+          <small class="positive">+42 bps vs benchmark</small>
+        </article>
+        <article class="kpi">
+          <span>Signal breadth</span>
+          <strong>64%</strong>
+          <small class="positive">Bullish or improving</small>
+        </article>
+        <article class="kpi">
+          <span>Cash and T-bills</span>
+          <strong>$31,250</strong>
+          <small class="neutral">7.3% dry powder</small>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="panel performance-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Performance</p>
+              <h2>Portfolio vs. blended benchmark</h2>
+            </div>
+            <div class="segmented" aria-label="Time range">
+              <button class="active">1Y</button>
+              <button>3Y</button>
+              <button>5Y</button>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <svg id="lineChart" viewBox="0 0 720 300" role="img" aria-label="Portfolio performance line chart"></svg>
+          </div>
+        </article>
+
+        <article class="panel allocation-panel" id="market-map">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Asset universe</p>
+              <h2>Investable category map</h2>
+            </div>
+          </div>
+          <div class="allocation-layout">
+            <div class="donut" aria-label="Asset allocation chart">
+              <span>100%</span>
+            </div>
+            <ul class="legend" id="allocationLegend"></ul>
+          </div>
+        </article>
+
+        <article class="panel wide-panel" id="technicals">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Technical analysis</p>
+              <h2>Cross-asset indicator matrix</h2>
+            </div>
+            <span class="data-badge">Sample EOD data</span>
+          </div>
+          <div class="table-wrap">
+            <table class="technical-table">
+              <thead>
+                <tr>
+                  <th>Instrument</th>
+                  <th>Category</th>
+                  <th>Trend</th>
+                  <th>RSI</th>
+                  <th>MACD</th>
+                  <th>50/200 DMA</th>
+                  <th>ATR</th>
+                  <th>Signal</th>
+                </tr>
+              </thead>
+              <tbody id="technicalRows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel holdings-panel" id="holdings">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Portfolio</p>
+              <h2>Largest positions</h2>
+            </div>
+            <button class="text-button">View all</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Asset</th>
+                  <th>Value</th>
+                  <th>Weight</th>
+                  <th>Today</th>
+                  <th>Technical bias</th>
+                </tr>
+              </thead>
+              <tbody id="holdingsRows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel watchlist-panel" id="watchlist">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Signals</p>
+              <h2>Opportunity radar</h2>
+            </div>
+          </div>
+          <div class="watchlist" id="watchlistCards"></div>
+        </article>
+
+        <article class="panel strategy-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Strategy lens</p>
+              <h2>Market regimes</h2>
+            </div>
+          </div>
+          <div class="regime-grid" id="regimeGrid"></div>
+        </article>
+
+        <article class="panel risk-panel" id="risk">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Risk</p>
+              <h2>Portfolio health</h2>
+            </div>
+          </div>
+          <div class="risk-list">
+            <div>
+              <span>Realized volatility</span>
+              <meter min="0" max="100" value="46"></meter>
+              <strong>Moderate</strong>
+            </div>
+            <div>
+              <span>Concentration</span>
+              <meter min="0" max="100" value="58"></meter>
+              <strong>Watch</strong>
+            </div>
+            <div>
+              <span>Liquidity</span>
+              <meter min="0" max="100" value="82"></meter>
+              <strong>Strong</strong>
+            </div>
+            <div>
+              <span>Macro sensitivity</span>
+              <meter min="0" max="100" value="63"></meter>
+              <strong>Elevated</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
