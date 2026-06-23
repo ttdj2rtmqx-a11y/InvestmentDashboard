@@ -1,23 +1,92 @@
-const holdings = [
-  { ticker: "VTI", name: "US Total Market ETF", value: "$96,420", weight: "22.5%", change: 1.2, bias: "Bullish" },
-  { ticker: "AAPL", name: "Apple Inc.", value: "$62,840", weight: "14.7%", change: 0.8, bias: "Bullish" },
-  { ticker: "MSFT", name: "Microsoft Corp.", value: "$58,110", weight: "13.5%", change: 1.7, bias: "Bullish" },
-  { ticker: "NVDA", name: "NVIDIA Corp.", value: "$44,900", weight: "10.5%", change: -0.6, bias: "Extended" },
-  { ticker: "BND", name: "Total Bond Market ETF", value: "$38,720", weight: "9.0%", change: 0.2, bias: "Neutral" },
-  { ticker: "GLD", name: "Gold Trust", value: "$21,440", weight: "5.0%", change: 0.9, bias: "Bullish" },
+const STORAGE_KEY = "investmentDeskPortfolioV2";
+
+const defaultHoldings = [
+  { ticker: "VTI", name: "US Total Market ETF", category: "US equities", value: 96420, change: 1.2, bias: "Bullish", risk: 58, target: 24 },
+  { ticker: "AAPL", name: "Apple Inc.", category: "US equities", value: 62840, change: 0.8, bias: "Bullish", risk: 74, target: 10 },
+  { ticker: "MSFT", name: "Microsoft Corp.", category: "US equities", value: 58110, change: 1.7, bias: "Bullish", risk: 70, target: 10 },
+  { ticker: "NVDA", name: "NVIDIA Corp.", category: "US equities", value: 44900, change: -0.6, bias: "Extended", risk: 88, target: 7 },
+  { ticker: "BND", name: "Total Bond Market ETF", category: "Fixed income", value: 38720, change: 0.2, bias: "Neutral", risk: 22, target: 14 },
+  { ticker: "GLD", name: "Gold Trust", category: "Commodities", value: 21440, change: 0.9, bias: "Bullish", risk: 45, target: 6 },
+  { ticker: "VNQ", name: "Real Estate ETF", category: "Real estate", value: 18260, change: 0.4, bias: "Recovery", risk: 61, target: 5 },
+  { ticker: "HYG", name: "High Yield Bond ETF", category: "Credit", value: 16880, change: 0.3, bias: "Carry", risk: 48, target: 7 },
+  { ticker: "BTC", name: "Bitcoin", category: "Crypto assets", value: 12940, change: 2.1, bias: "Risk cap", risk: 96, target: 3 },
+  { ticker: "CASH", name: "Cash and T-bills", category: "Cash", value: 31250, change: 0, bias: "Reserve", risk: 3, target: 7 },
 ];
 
-const allocation = [
-  { label: "US equities", value: 32, color: "#0f8f8c" },
-  { label: "International equities", value: 15, color: "#3867d6" },
-  { label: "Fixed income", value: 14, color: "#1c9a67" },
-  { label: "Credit and preferreds", value: 8, color: "#4f6f52" },
-  { label: "Commodities", value: 7, color: "#c88a24" },
-  { label: "Real estate", value: 6, color: "#8f5a3c" },
-  { label: "Crypto assets", value: 4, color: "#7257c8" },
-  { label: "Alternatives", value: 7, color: "#546179" },
-  { label: "Cash and T-bills", value: 7, color: "#93a4b5" },
-];
+const riskProfiles = {
+  conservative: {
+    label: "Conservative income",
+    summary: "Prioritizes liquidity, income, and lower drawdown risk.",
+    categoryTargets: {
+      "US equities": 24,
+      "International equities": 10,
+      "Fixed income": 30,
+      Credit: 12,
+      Commodities: 5,
+      "Real estate": 5,
+      "Crypto assets": 1,
+      Alternatives: 3,
+      Cash: 10,
+    },
+  },
+  balanced: {
+    label: "Balanced growth",
+    summary: "Blends equity growth, income carry, real assets, and cash flexibility.",
+    categoryTargets: {
+      "US equities": 36,
+      "International equities": 14,
+      "Fixed income": 18,
+      Credit: 8,
+      Commodities: 6,
+      "Real estate": 5,
+      "Crypto assets": 3,
+      Alternatives: 3,
+      Cash: 7,
+    },
+  },
+  growth: {
+    label: "Growth",
+    summary: "Tilts toward equities while preserving diversifiers and liquidity.",
+    categoryTargets: {
+      "US equities": 48,
+      "International equities": 16,
+      "Fixed income": 10,
+      Credit: 5,
+      Commodities: 5,
+      "Real estate": 5,
+      "Crypto assets": 4,
+      Alternatives: 2,
+      Cash: 5,
+    },
+  },
+  aggressive: {
+    label: "Aggressive growth",
+    summary: "Maximizes growth exposure with higher volatility and concentration limits.",
+    categoryTargets: {
+      "US equities": 55,
+      "International equities": 18,
+      "Fixed income": 6,
+      Credit: 3,
+      Commodities: 4,
+      "Real estate": 4,
+      "Crypto assets": 6,
+      Alternatives: 1,
+      Cash: 3,
+    },
+  },
+};
+
+const categoryColors = {
+  "US equities": "#0f8f8c",
+  "International equities": "#3867d6",
+  "Fixed income": "#1c9a67",
+  Credit: "#4f6f52",
+  Commodities: "#c88a24",
+  "Real estate": "#8f5a3c",
+  "Crypto assets": "#7257c8",
+  Alternatives: "#546179",
+  Cash: "#93a4b5",
+};
 
 const technicals = [
   { ticker: "SPY", name: "S&P 500 ETF", category: "US large cap", trend: "Uptrend", rsi: 61, macd: "Bull cross", dma: "+7.8%", atr: "0.9%", signal: "Buy dips" },
@@ -52,25 +121,71 @@ const regimes = [
 const portfolio = [100, 103, 101, 108, 112, 116, 114, 121, 126, 124, 131, 137];
 const benchmark = [100, 101, 100, 104, 107, 109, 108, 112, 116, 115, 119, 123];
 
-function trendClass(value) {
-  if (typeof value === "number") {
-    return value >= 0 ? "positive" : "negative";
-  }
+let appState = loadState();
+let latestRecommendations = [];
 
-  const normalized = value.toLowerCase();
-  if (normalized.includes("bull") || normalized.includes("positive") || normalized.includes("buy") || normalized.includes("uptrend")) {
-    return "positive";
+function loadState() {
+  const fallback = {
+    holdings: structuredClone(defaultHoldings),
+    riskProfile: "balanced",
+    cashTarget: 7,
+    maxPosition: 18,
+    tradeThreshold: 1.5,
+  };
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!saved || !Array.isArray(saved.holdings)) return fallback;
+    return { ...fallback, ...saved };
+  } catch {
+    return fallback;
   }
-  if (normalized.includes("down") || normalized.includes("negative") || normalized.includes("hedge")) {
-    return "negative";
-  }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+}
+
+function money(value) {
+  return value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+}
+
+function pct(value, digits = 1) {
+  return `${value.toFixed(digits)}%`;
+}
+
+function totalPortfolioValue() {
+  return appState.holdings.reduce((sum, item) => sum + Number(item.value || 0), 0);
+}
+
+function categoryTotals() {
+  const total = totalPortfolioValue();
+  return appState.holdings.reduce((map, item) => {
+    const key = item.category || "Alternatives";
+    if (!map[key]) map[key] = { value: 0, weight: 0 };
+    map[key].value += Number(item.value || 0);
+    map[key].weight = total ? (map[key].value / total) * 100 : 0;
+    return map;
+  }, {});
+}
+
+function currentWeight(item) {
+  const total = totalPortfolioValue();
+  return total ? (Number(item.value || 0) / total) * 100 : 0;
+}
+
+function trendClass(value) {
+  if (typeof value === "number") return value >= 0 ? "positive" : "negative";
+  const normalized = String(value).toLowerCase();
+  if (normalized.includes("bull") || normalized.includes("positive") || normalized.includes("buy") || normalized.includes("uptrend") || normalized.includes("carry")) return "positive";
+  if (normalized.includes("down") || normalized.includes("negative") || normalized.includes("hedge") || normalized.includes("trim")) return "negative";
   return "neutral";
 }
 
 function currencyTrend(value) {
   const className = trendClass(value);
   const sign = value >= 0 ? "+" : "";
-  return `<span class="${className}">${sign}${value.toFixed(1)}%</span>`;
+  return `<span class="${className}">${sign}${Number(value).toFixed(1)}%</span>`;
 }
 
 function signalPill(label) {
@@ -86,23 +201,32 @@ function rsiPill(rsi) {
 }
 
 function renderHoldings() {
-  const rows = holdings
+  const rows = appState.holdings
     .map(
-      (item) => `
+      (item, index) => `
         <tr>
           <td>
-            <div class="asset-cell">
+            <div class="asset-cell editable-asset">
               <span class="ticker">${item.ticker.slice(0, 2)}</span>
               <div>
-                <strong>${item.ticker}</strong><br />
-                <span>${item.name}</span>
+                <input class="inline-input ticker-input" data-field="ticker" data-index="${index}" value="${item.ticker}" aria-label="Ticker" />
+                <input class="inline-input name-input" data-field="name" data-index="${index}" value="${item.name}" aria-label="Asset name" />
               </div>
             </div>
           </td>
-          <td>${item.value}</td>
-          <td>${item.weight}</td>
-          <td>${currencyTrend(item.change)}</td>
+          <td>
+            <select class="table-select" data-field="category" data-index="${index}" aria-label="Category">
+              ${Object.keys(categoryColors)
+                .map((category) => `<option value="${category}" ${category === item.category ? "selected" : ""}>${category}</option>`)
+                .join("")}
+            </select>
+          </td>
+          <td><input class="number-input" data-field="value" data-index="${index}" type="number" min="0" step="100" value="${Math.round(item.value)}" aria-label="Market value" /></td>
+          <td><strong>${pct(currentWeight(item))}</strong></td>
+          <td><input class="number-input compact-input" data-field="target" data-index="${index}" type="number" min="0" max="100" step="0.5" value="${item.target}" aria-label="Target weight" /></td>
+          <td><input class="number-input compact-input" data-field="risk" data-index="${index}" type="number" min="0" max="100" step="1" value="${item.risk}" aria-label="Risk score" /></td>
           <td>${signalPill(item.bias)}</td>
+          <td><button class="icon-button table-action" data-remove="${index}" aria-label="Remove ${item.ticker}" title="Remove holding">×</button></td>
         </tr>
       `
     )
@@ -112,22 +236,28 @@ function renderHoldings() {
 }
 
 function renderAllocation() {
-  const items = allocation
-    .map(
-      (item) => `
+  const totals = categoryTotals();
+  const profile = riskProfiles[appState.riskProfile];
+  const categories = Object.keys(profile.categoryTargets);
+  const items = categories
+    .map((category) => {
+      const actual = totals[category]?.weight || 0;
+      const target = profile.categoryTargets[category];
+      return `
         <li>
-          <span><i style="background:${item.color}"></i> ${item.label}</span>
-          <strong>${item.value}%</strong>
+          <span><i style="background:${categoryColors[category]}"></i> ${category}</span>
+          <strong>${pct(actual)} / ${pct(target, 0)}</strong>
         </li>
-      `
-    )
+      `;
+    })
     .join("");
 
-  const stops = [];
   let cursor = 0;
-  allocation.forEach((item) => {
-    stops.push(`${item.color} ${cursor}% ${cursor + item.value}%`);
-    cursor += item.value;
+  const stops = categories.map((category) => {
+    const value = totals[category]?.weight || 0;
+    const stop = `${categoryColors[category]} ${cursor}% ${Math.min(100, cursor + value)}%`;
+    cursor += value;
+    return stop;
   });
 
   document.querySelector(".donut").style.background = `conic-gradient(${stops.join(", ")})`;
@@ -200,6 +330,154 @@ function renderRegimes() {
   document.querySelector("#regimeGrid").innerHTML = cards;
 }
 
+function rebalanceModel() {
+  const total = totalPortfolioValue();
+  const thresholdValue = total * (Number(appState.tradeThreshold) / 100);
+  const maxPositionValue = total * (Number(appState.maxPosition) / 100);
+  const cashTargetValue = total * (Number(appState.cashTarget) / 100);
+  const holdings = appState.holdings;
+  const recommendations = [];
+
+  holdings.forEach((item) => {
+    const targetValue = total * (Number(item.target || 0) / 100);
+    let delta = targetValue - Number(item.value || 0);
+
+    if (item.ticker !== "CASH" && Number(item.value || 0) > maxPositionValue) {
+      delta = Math.min(delta, maxPositionValue - Number(item.value || 0));
+    }
+
+    if (item.ticker === "CASH") {
+      delta = cashTargetValue - Number(item.value || 0);
+    }
+
+    if (Math.abs(delta) >= thresholdValue) {
+      recommendations.push({
+        action: delta > 0 ? "Buy" : "Sell",
+        ticker: item.ticker,
+        name: item.name,
+        amount: Math.abs(delta),
+        reason: tradeReason(item, delta),
+      });
+    }
+  });
+
+  const netBuys = recommendations.reduce((sum, trade) => sum + (trade.action === "Buy" ? trade.amount : -trade.amount), 0);
+  return { recommendations, projectedCash: Math.max(0, cashTargetValue - netBuys), thresholdValue };
+}
+
+function tradeReason(item, delta) {
+  const weight = currentWeight(item);
+  if (item.ticker === "CASH") return delta > 0 ? "Raise reserve to match cash target." : "Deploy excess cash into target allocation.";
+  if (weight > appState.maxPosition) return "Trim concentration above max position limit.";
+  if (delta > 0 && trendClass(item.bias) === "positive") return "Below target and technical bias is constructive.";
+  if (delta > 0) return "Below target allocation for selected risk profile.";
+  if (item.risk > 80) return "Reduce high-volatility exposure toward target.";
+  return "Above target allocation after risk-profile update.";
+}
+
+function renderRecommendations(runModel = false) {
+  if (runModel) {
+    latestRecommendations = rebalanceModel().recommendations;
+    document.querySelector("#rebalanceStatus").textContent = "Model updated";
+  }
+
+  const trades = latestRecommendations;
+  const rows = trades.length
+    ? trades
+        .map(
+          (trade) => `
+            <tr>
+              <td>${signalPill(trade.action)}</td>
+              <td><strong>${trade.ticker}</strong><br /><span>${trade.name}</span></td>
+              <td>${money(trade.amount)}</td>
+              <td>${trade.reason}</td>
+            </tr>
+          `
+        )
+        .join("")
+    : `<tr><td colspan="4" class="empty-state">Run Rebalance to generate trade recommendations.</td></tr>`;
+
+  const projectedCash = runModel ? rebalanceModel().projectedCash : appState.holdings.find((item) => item.ticker === "CASH")?.value || 0;
+
+  document.querySelector("#tradeRows").innerHTML = rows;
+  document.querySelector("#tradeCount").textContent = trades.length;
+  document.querySelector("#tradeSummary").textContent = trades.length ? `${trades.filter((trade) => trade.action === "Buy").length} buys and ${trades.filter((trade) => trade.action === "Sell").length} sells suggested.` : "Run the model to calculate recommendations.";
+  document.querySelector("#recommendationCount").textContent = `${trades.length} actions`;
+  document.querySelector("#projectedCash").textContent = money(projectedCash);
+}
+
+function renderTargetBars() {
+  const totals = categoryTotals();
+  const targets = riskProfiles[appState.riskProfile].categoryTargets;
+  const bars = Object.keys(targets)
+    .map((category) => {
+      const actual = totals[category]?.weight || 0;
+      const target = targets[category];
+      const drift = actual - target;
+      return `
+        <div class="target-bar">
+          <div>
+            <strong>${category}</strong>
+            <span>${pct(actual)} current · ${pct(target, 0)} target · ${drift >= 0 ? "+" : ""}${pct(drift)}</span>
+          </div>
+          <div class="bar-track">
+            <i style="width:${Math.min(100, actual)}%; background:${categoryColors[category]}"></i>
+            <b style="left:${Math.min(100, target)}%"></b>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const avgDrift = Object.keys(targets).reduce((sum, category) => sum + Math.abs((totals[category]?.weight || 0) - targets[category]), 0) / Object.keys(targets).length;
+  document.querySelector("#targetBars").innerHTML = bars;
+  document.querySelector("#allocationHealth").textContent = avgDrift < 2 ? "Close to model" : avgDrift < 5 ? "Moderate drift" : "Rebalance due";
+}
+
+function updateRiskMeters() {
+  const total = totalPortfolioValue();
+  const weightedRisk = total ? appState.holdings.reduce((sum, item) => sum + (Number(item.value || 0) / total) * Number(item.risk || 0), 0) : 0;
+  const weights = appState.holdings.map(currentWeight);
+  const maxWeight = Math.max(...weights, 0);
+  const cashWeight = currentWeight(appState.holdings.find((item) => item.ticker === "CASH") || { value: 0 });
+  const cryptoWeight = appState.holdings.filter((item) => item.category === "Crypto assets").reduce((sum, item) => sum + currentWeight(item), 0);
+  const commodityWeight = appState.holdings.filter((item) => item.category === "Commodities").reduce((sum, item) => sum + currentWeight(item), 0);
+
+  const concentration = Math.min(100, maxWeight * 3.2);
+  const liquidity = Math.max(10, Math.min(100, 70 + cashWeight * 2 - cryptoWeight * 1.5));
+  const macro = Math.min(100, weightedRisk * 0.55 + commodityWeight * 2.5 + cryptoWeight * 2);
+
+  document.querySelector("#riskScore").textContent = Math.round(weightedRisk);
+  document.querySelector("#riskSummary").textContent = riskProfiles[appState.riskProfile].summary;
+  updateMeter("volatility", weightedRisk);
+  updateMeter("concentration", concentration);
+  updateMeter("liquidity", liquidity, true);
+  updateMeter("macro", macro);
+}
+
+function updateMeter(name, value, inverse = false) {
+  const meter = document.querySelector(`#${name}Meter`);
+  const label = document.querySelector(`#${name}Label`);
+  meter.value = Math.round(value);
+  const score = inverse ? 100 - value : value;
+  label.textContent = score < 35 ? "Strong" : score < 65 ? "Moderate" : score < 82 ? "Elevated" : "High";
+}
+
+function renderSummary() {
+  const total = totalPortfolioValue();
+  const cashHolding = appState.holdings.find((item) => item.ticker === "CASH");
+  const cashValue = cashHolding?.value || 0;
+  const cashPct = total ? (cashValue / total) * 100 : 0;
+  const maxDrift = Math.max(...appState.holdings.map((item) => Math.abs(currentWeight(item) - Number(item.target || 0))), 0);
+  const signalBreadth = Math.round((appState.holdings.filter((item) => trendClass(item.bias) === "positive").length / appState.holdings.length) * 100);
+
+  document.querySelector("#totalValue").textContent = money(total);
+  document.querySelector("#cashReserve").textContent = money(cashValue);
+  document.querySelector("#cashWeight").textContent = `${pct(cashPct)} dry powder`;
+  document.querySelector("#portfolioDrift").textContent = `${pct(maxDrift)} max position drift`;
+  document.querySelector("#signalBreadth").textContent = `${signalBreadth}%`;
+}
+
 function makePath(points, width, height, padding) {
   const min = Math.min(...points);
   const max = Math.max(...points);
@@ -240,9 +518,135 @@ function renderChart() {
   `;
 }
 
-renderHoldings();
-renderAllocation();
+function syncControls() {
+  document.querySelector("#riskProfile").value = appState.riskProfile;
+  document.querySelector("#cashTarget").value = appState.cashTarget;
+  document.querySelector("#maxPosition").value = appState.maxPosition;
+  document.querySelector("#tradeThreshold").value = appState.tradeThreshold;
+  document.querySelector("#cashTargetOutput").textContent = pct(Number(appState.cashTarget), 0);
+  document.querySelector("#maxPositionOutput").textContent = pct(Number(appState.maxPosition), 0);
+  document.querySelector("#tradeThresholdOutput").textContent = pct(Number(appState.tradeThreshold));
+}
+
+function renderAll(options = {}) {
+  syncControls();
+  renderHoldings();
+  renderAllocation();
+  renderTargetBars();
+  renderSummary();
+  updateRiskMeters();
+  renderRecommendations(options.runModel);
+}
+
+function updateHolding(index, field, rawValue) {
+  const item = appState.holdings[index];
+  if (!item) return;
+  if (["value", "target", "risk"].includes(field)) {
+    item[field] = Number(rawValue || 0);
+  } else {
+    item[field] = rawValue;
+  }
+  if (field === "ticker") item.ticker = rawValue.toUpperCase();
+  latestRecommendations = [];
+  saveState();
+  renderAll();
+}
+
+function addHolding() {
+  appState.holdings.push({
+    ticker: "NEW",
+    name: "New position",
+    category: "US equities",
+    value: 10000,
+    change: 0,
+    bias: "Neutral",
+    risk: 55,
+    target: 2,
+  });
+  latestRecommendations = [];
+  saveState();
+  renderAll();
+}
+
+function removeHolding(index) {
+  appState.holdings.splice(index, 1);
+  saveState();
+  latestRecommendations = [];
+  renderAll();
+}
+
+function applyProfileTargets(profileName) {
+  const targets = riskProfiles[profileName].categoryTargets;
+  const categoryGroups = appState.holdings.reduce((map, item) => {
+    if (!map[item.category]) map[item.category] = [];
+    map[item.category].push(item);
+    return map;
+  }, {});
+
+  Object.entries(categoryGroups).forEach(([category, items]) => {
+    const categoryTarget = targets[category] || 0;
+    const totalCurrent = items.reduce((sum, item) => sum + currentWeight(item), 0) || items.length;
+    items.forEach((item) => {
+      const currentShare = totalCurrent ? currentWeight(item) / totalCurrent : 1 / items.length;
+      item.target = Number((categoryTarget * currentShare).toFixed(1));
+    });
+  });
+}
+
+function bindEvents() {
+  document.querySelector("#holdingsRows").addEventListener("change", (event) => {
+    const index = Number(event.target.dataset.index);
+    const field = event.target.dataset.field;
+    if (field) updateHolding(index, field, event.target.value);
+  });
+
+  document.querySelector("#holdingsRows").addEventListener("click", (event) => {
+    const removeIndex = event.target.dataset.remove;
+    if (removeIndex !== undefined) removeHolding(Number(removeIndex));
+  });
+
+  document.querySelector("#addHolding").addEventListener("click", addHolding);
+
+  document.querySelector("#riskProfile").addEventListener("change", (event) => {
+    appState.riskProfile = event.target.value;
+    applyProfileTargets(appState.riskProfile);
+    latestRecommendations = [];
+    saveState();
+    renderAll();
+  });
+
+  ["cashTarget", "maxPosition", "tradeThreshold"].forEach((id) => {
+    document.querySelector(`#${id}`).addEventListener("input", (event) => {
+      appState[id] = Number(event.target.value);
+      latestRecommendations = [];
+      saveState();
+      renderAll();
+    });
+  });
+
+  document.querySelector("#runRebalance").addEventListener("click", () => renderAll({ runModel: true }));
+  document.querySelector("#runRebalanceTop").addEventListener("click", () => {
+    document.querySelector("#rebalance").scrollIntoView({ behavior: "smooth", block: "start" });
+    renderAll({ runModel: true });
+  });
+
+  document.querySelector("#resetPortfolio").addEventListener("click", () => {
+    appState = {
+      holdings: structuredClone(defaultHoldings),
+      riskProfile: "balanced",
+      cashTarget: 7,
+      maxPosition: 18,
+      tradeThreshold: 1.5,
+    };
+    latestRecommendations = [];
+    saveState();
+    renderAll();
+  });
+}
+
 renderTechnicals();
 renderWatchlist();
 renderRegimes();
 renderChart();
+bindEvents();
+renderAll();
