@@ -6,6 +6,7 @@
     <title>Investment Desk Pro</title>
     <link rel="stylesheet" href="styles.css?v=watchlist-1" />
     <link rel="stylesheet" href="watchlist.css?v=watchlist-1" />
+    <link rel="stylesheet" href="yield.css?v=yield-1" />
   </head>
   <body>
     <aside class="sidebar" aria-label="Trading platform navigation">
@@ -25,6 +26,7 @@
         <a href="#market-map">Markets</a>
         <a href="#technicals">Technicals</a>
         <a href="#holdings">Portfolio</a>
+        <a href="#yield-forecast">Yield</a>
         <a href="#rebalance">Rebalance</a>
         <a href="#watchlist">Watchlist</a>
         <a href="#risk">Risk</a>
@@ -259,6 +261,95 @@
           </div>
         </article>
 
+        <article class="panel wide-panel yield-panel" id="yield-forecast">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Yield forecasting</p>
+              <h2>Portfolio income projection</h2>
+            </div>
+            <span class="data-badge" id="yieldStatus">Portfolio linked</span>
+          </div>
+
+          <div class="yield-grid">
+            <section class="yield-summary" aria-label="Yield forecast summary">
+              <div>
+                <span>Weighted portfolio yield</span>
+                <strong id="portfolioYield">0.0%</strong>
+                <small id="yieldQuality">Based on current holdings and category assumptions.</small>
+              </div>
+              <div>
+                <span>Projected annual income</span>
+                <strong id="annualIncome">$0</strong>
+                <small id="monthlyIncome">$0 monthly run-rate</small>
+              </div>
+              <div>
+                <span>12-month forecast range</span>
+                <strong id="incomeRange">$0 - $0</strong>
+                <small id="incomeRangeNote">Includes rate and allocation sensitivity.</small>
+              </div>
+            </section>
+
+            <section class="yield-controls" aria-label="Yield forecast controls">
+              <label>
+                <span>Rate scenario</span>
+                <select id="rateScenario">
+                  <option value="base">Base case</option>
+                  <option value="falling">Rates -100 bps</option>
+                  <option value="rising">Rates +100 bps</option>
+                  <option value="stress">Credit stress</option>
+                </select>
+              </label>
+              <label>
+                <span>Reinvestment</span>
+                <input id="reinvestmentRate" type="range" min="0" max="100" value="50" />
+                <strong><output id="reinvestmentOutput">50%</output></strong>
+              </label>
+              <label>
+                <span>Income horizon</span>
+                <select id="incomeHorizon">
+                  <option value="12">12 months</option>
+                  <option value="24">24 months</option>
+                  <option value="36">36 months</option>
+                </select>
+              </label>
+            </section>
+          </div>
+
+          <div class="yield-detail-grid">
+            <section class="yield-chart-card" aria-label="Income forecast chart">
+              <div class="subheader">
+                <h3>Income run-rate forecast</h3>
+                <span id="yieldScenarioLabel">Base case</span>
+              </div>
+              <svg id="yieldForecastChart" viewBox="0 0 720 260" role="img" aria-label="Projected portfolio income chart"></svg>
+            </section>
+
+            <section class="yield-chart-card" aria-label="Yield contribution by category">
+              <div class="subheader">
+                <h3>Yield contribution</h3>
+                <span id="yieldConcentration">Diversified</span>
+              </div>
+              <div class="yield-bars" id="yieldBars"></div>
+            </section>
+          </div>
+
+          <div class="table-wrap compact">
+            <table class="yield-table">
+              <thead>
+                <tr>
+                  <th>Holding</th>
+                  <th>Category</th>
+                  <th>Value</th>
+                  <th>Yield</th>
+                  <th>Annual income</th>
+                  <th>Income share</th>
+                </tr>
+              </thead>
+              <tbody id="yieldRows"></tbody>
+            </table>
+          </div>
+        </article>
+
         <article class="panel wide-panel rebalance-panel" id="rebalance">
           <div class="panel-header">
             <div>
@@ -463,5 +554,6 @@
     <script src="policy.js?v=policy-ai-2"></script>
     <script src="markets.js?v=watchlist-1"></script>
     <script src="watchlist.js?v=watchlist-1"></script>
+    <script src="yield.js?v=yield-1"></script>
   </body>
 </html>
