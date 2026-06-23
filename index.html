@@ -18,6 +18,7 @@
 
       <nav class="nav-list">
         <a class="active" href="#overview">Overview</a>
+        <a href="#data">Data</a>
         <a href="#market-map">Markets</a>
         <a href="#technicals">Technicals</a>
         <a href="#holdings">Portfolio</a>
@@ -69,6 +70,37 @@
       </section>
 
       <section class="dashboard-grid">
+        <article class="panel wide-panel data-panel" id="data">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Market data</p>
+              <h2>Live data connection</h2>
+            </div>
+            <span class="data-badge" id="marketDataStatus">Sample mode</span>
+          </div>
+
+          <div class="data-controls">
+            <label>
+              <span>Equity and ETF source</span>
+              <select id="marketDataProvider">
+                <option value="alphaVantage">Alpha Vantage</option>
+              </select>
+            </label>
+            <label>
+              <span>API key</span>
+              <input id="marketDataKey" type="password" placeholder="Paste Alpha Vantage key" autocomplete="off" />
+            </label>
+            <div class="control-actions">
+              <button class="primary-button" id="refreshMarketData">Refresh Live Data</button>
+              <button class="text-button" id="saveMarketDataKey">Save key</button>
+            </div>
+            <div class="source-note">
+              <strong id="marketDataSource">Holdings use sample values until refreshed.</strong>
+              <small id="marketDataDetail">Crypto prices refresh from CoinGecko. Equities and ETFs use Alpha Vantage with your key.</small>
+            </div>
+          </div>
+        </article>
+
         <article class="panel performance-panel">
           <div class="panel-header">
             <div>
@@ -107,7 +139,7 @@
               <p class="eyebrow">Technical analysis</p>
               <h2>Cross-asset indicator matrix</h2>
             </div>
-            <span class="data-badge">Sample EOD data</span>
+            <span class="data-badge" id="technicalDataStatus">Sample EOD data</span>
           </div>
           <div class="table-wrap">
             <table class="technical-table">
@@ -142,6 +174,9 @@
                 <tr>
                   <th>Asset</th>
                   <th>Category</th>
+                  <th>Qty</th>
+                  <th>Live Px</th>
+                  <th>1D</th>
                   <th>Value</th>
                   <th>Weight</th>
                   <th>Target</th>
