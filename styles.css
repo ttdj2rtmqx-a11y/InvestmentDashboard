@@ -272,6 +272,66 @@ td,
   grid-column: 1 / -1;
 }
 
+.data-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.data-controls {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.55fr) minmax(260px, 0.95fr) auto minmax(260px, 1fr);
+  gap: 14px;
+  align-items: end;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.data-controls label,
+.source-note {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.data-controls label span,
+.source-note small,
+.source-label {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.data-controls input,
+.data-controls select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.source-note strong {
+  color: var(--ink);
+}
+
+.source-note small {
+  line-height: 1.4;
+  text-transform: none;
+}
+
+.source-label {
+  display: inline-block;
+  margin-top: 2px;
+  color: #7c8b99;
+  text-transform: none;
+}
+
 .segmented {
   height: 36px;
   padding: 3px;
@@ -400,7 +460,7 @@ table {
 }
 
 .portfolio-table {
-  min-width: 980px;
+  min-width: 1220px;
 }
 
 .trade-table {
@@ -643,6 +703,11 @@ th {
   gap: 10px;
 }
 
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .model-summary {
   display: grid;
   grid-template-columns: 1fr;
@@ -796,7 +861,8 @@ meter::-webkit-meter-optimum-value {
   }
 
   .rebalance-layout,
-  .recommendation-grid {
+  .recommendation-grid,
+  .data-controls {
     grid-template-columns: 1fr;
   }
 
