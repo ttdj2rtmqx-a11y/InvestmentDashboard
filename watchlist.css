@@ -1,0 +1,254 @@
+.index-panel {
+  gap: 12px;
+}
+
+.index-grid {
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.index-card {
+  padding: 10px;
+  gap: 8px;
+  border-radius: 12px;
+}
+
+.index-sparkline {
+  height: 58px;
+}
+
+.index-metrics {
+  gap: 8px;
+}
+
+.index-summary {
+  grid-template-columns: minmax(180px, 0.24fr) 1fr;
+  gap: 10px;
+}
+
+.index-summary section {
+  padding: 10px 12px;
+  gap: 6px;
+  border-radius: 12px;
+}
+
+.breadth-bars {
+  gap: 7px;
+}
+
+.watchlist-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.watchlist-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(360px, 0.58fr);
+  gap: 16px;
+}
+
+.watchlist-builder,
+.watch-performance {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.watchlist-builder {
+  display: grid;
+  gap: 14px;
+}
+
+.watchlist-controls {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.45fr) minmax(180px, 1fr) minmax(130px, 0.5fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.watchlist-controls label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.watchlist-controls span,
+.watch-performance-header span,
+.watch-metrics span,
+.watch-card-type {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.watchlist-controls input,
+.watchlist-controls select {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-weight: 750;
+}
+
+.watchlist-controls input:focus,
+.watchlist-controls select:focus {
+  border-color: rgba(10, 132, 255, 0.52);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.11);
+  outline: none;
+}
+
+.watchlist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.watch-card {
+  min-width: 0;
+  min-height: 94px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.68);
+  color: inherit;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.watch-card:hover,
+.watch-card.active {
+  border-color: rgba(10, 132, 255, 0.38);
+  box-shadow: 0 10px 28px rgba(10, 132, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.watch-card .signal-pill.positive {
+  background: #e7f5ef;
+  color: var(--green);
+}
+
+.watch-card .signal-pill.negative {
+  background: #f8ecec;
+  color: var(--red);
+}
+
+.watch-card-top,
+.watch-card-bottom,
+.watch-performance-header,
+.watch-metrics {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.watch-card strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.watch-card small {
+  display: block;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.watch-mini-line {
+  width: 100%;
+  height: 28px;
+}
+
+.watch-card-bottom {
+  align-items: end;
+}
+
+.watch-card-bottom b {
+  white-space: nowrap;
+}
+
+.watch-performance {
+  display: grid;
+  gap: 14px;
+}
+
+.watch-performance-header {
+  align-items: center;
+}
+
+.watch-performance-header div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.watch-performance-header strong {
+  font-size: 1.65rem;
+}
+
+.watch-performance-header small {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#watchPerformanceChart {
+  height: 220px;
+}
+
+.watch-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.watch-metrics div {
+  min-height: 70px;
+  padding: 10px;
+  display: grid;
+  align-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.watch-metrics strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1080px) {
+  .index-grid,
+  .index-summary,
+  .watchlist-workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .watch-card-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .breadth-bars > div,
+  .watchlist,
+  .watchlist-controls,
+  .watch-metrics {
+    grid-template-columns: 1fr;
+  }
+}
