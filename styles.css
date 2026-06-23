@@ -141,6 +141,11 @@ h2 {
   font-size: 1.1rem;
 }
 
+h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
 .actions {
   display: flex;
   align-items: center;
@@ -150,8 +155,14 @@ h2 {
 .icon-button,
 .primary-button,
 .text-button,
-.segmented button {
+.segmented button,
+select,
+input {
   border: 0;
+}
+
+button,
+select {
   cursor: pointer;
 }
 
@@ -388,6 +399,14 @@ table {
   min-width: 1020px;
 }
 
+.portfolio-table {
+  min-width: 980px;
+}
+
+.trade-table {
+  min-width: 620px;
+}
+
 th,
 td {
   padding: 14px 10px;
@@ -433,6 +452,68 @@ th {
   background: transparent;
   color: var(--teal);
   font-weight: 800;
+}
+
+.editable-asset {
+  align-items: flex-start;
+}
+
+.inline-input,
+.number-input,
+.table-select,
+.control-surface select {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #ffffff;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.inline-input {
+  display: block;
+  min-width: 190px;
+  padding: 6px 8px;
+}
+
+.ticker-input {
+  width: 82px;
+  min-width: 82px;
+  margin-bottom: 4px;
+  color: var(--teal);
+  text-transform: uppercase;
+}
+
+.name-input {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.number-input,
+.table-select {
+  min-width: 120px;
+  padding: 6px 8px;
+  text-align: right;
+}
+
+.table-select {
+  min-width: 150px;
+  text-align: left;
+}
+
+.compact-input {
+  min-width: 78px;
+  max-width: 92px;
+}
+
+.table-action {
+  width: 34px;
+  height: 34px;
+  box-shadow: none;
+  color: var(--red);
+  font-size: 1rem;
 }
 
 .rsi {
@@ -510,6 +591,158 @@ th {
   line-height: 1.45;
 }
 
+.rebalance-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.rebalance-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 16px;
+}
+
+.control-surface {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.control-surface label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.control-surface label span,
+.model-summary span,
+.subheader span,
+.target-bar span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.control-surface select {
+  padding: 0 10px;
+}
+
+.control-surface input[type="range"] {
+  width: 100%;
+  accent-color: var(--teal);
+}
+
+.control-actions {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.model-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.model-summary > div {
+  min-height: 90px;
+  padding: 14px;
+  display: grid;
+  align-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.model-summary strong {
+  font-size: 1.5rem;
+}
+
+.model-summary small {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.recommendation-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  gap: 16px;
+}
+
+.recommendation-grid > section {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.subheader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.compact {
+  margin-top: 0;
+}
+
+.empty-state {
+  padding: 28px 10px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.target-bars {
+  display: grid;
+  gap: 13px;
+}
+
+.target-bar {
+  display: grid;
+  gap: 7px;
+}
+
+.target-bar > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.target-bar strong {
+  font-size: 0.92rem;
+}
+
+.bar-track {
+  position: relative;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8edf2;
+}
+
+.bar-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.bar-track b {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 18px;
+  background: var(--ink);
+}
+
 .risk-list {
   display: grid;
   gap: 18px;
@@ -544,7 +777,7 @@ meter::-webkit-meter-optimum-value {
   }
 
   .nav-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .market-note {
@@ -560,6 +793,15 @@ meter::-webkit-meter-optimum-value {
   .holdings-panel,
   .wide-panel {
     grid-column: 1 / -1;
+  }
+
+  .rebalance-layout,
+  .recommendation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .control-surface {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -605,5 +847,22 @@ meter::-webkit-meter-optimum-value {
 
   .signal-score span {
     text-align: left;
+  }
+
+  .control-surface,
+  .target-bar > div:first-child {
+    grid-template-columns: 1fr;
+  }
+
+  .control-surface {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .control-actions,
+  .subheader,
+  .target-bar > div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
