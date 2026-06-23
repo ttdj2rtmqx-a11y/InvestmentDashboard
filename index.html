@@ -21,6 +21,7 @@
         <a href="#market-map">Markets</a>
         <a href="#technicals">Technicals</a>
         <a href="#holdings">Portfolio</a>
+        <a href="#rebalance">Rebalance</a>
         <a href="#watchlist">Signals</a>
         <a href="#risk">Risk</a>
       </nav>
@@ -40,15 +41,15 @@
         </div>
         <div class="actions">
           <button class="icon-button" aria-label="Download report" title="Download report">↓</button>
-          <button class="primary-button">Run Rebalance</button>
+          <button class="primary-button" id="runRebalanceTop">Run Rebalance</button>
         </div>
       </header>
 
       <section class="kpi-grid" id="overview" aria-label="Portfolio and market summary">
         <article class="kpi">
           <span>Net portfolio value</span>
-          <strong>$428,940</strong>
-          <small class="positive">+$12,480 this month</small>
+          <strong id="totalValue">$428,940</strong>
+          <small id="portfolioDrift" class="neutral">Model drift ready</small>
         </article>
         <article class="kpi">
           <span>One-day P/L</span>
@@ -57,13 +58,13 @@
         </article>
         <article class="kpi">
           <span>Signal breadth</span>
-          <strong>64%</strong>
+          <strong id="signalBreadth">64%</strong>
           <small class="positive">Bullish or improving</small>
         </article>
         <article class="kpi">
           <span>Cash and T-bills</span>
-          <strong>$31,250</strong>
-          <small class="neutral">7.3% dry powder</small>
+          <strong id="cashReserve">$31,250</strong>
+          <small id="cashWeight" class="neutral">7.3% dry powder</small>
         </article>
       </section>
 
@@ -131,23 +132,121 @@
           <div class="panel-header">
             <div>
               <p class="eyebrow">Portfolio</p>
-              <h2>Largest positions</h2>
+              <h2>Editable positions</h2>
             </div>
-            <button class="text-button">View all</button>
+            <button class="text-button" id="addHolding">Add holding</button>
           </div>
           <div class="table-wrap">
-            <table>
+            <table class="portfolio-table">
               <thead>
                 <tr>
                   <th>Asset</th>
+                  <th>Category</th>
                   <th>Value</th>
                   <th>Weight</th>
-                  <th>Today</th>
-                  <th>Technical bias</th>
+                  <th>Target</th>
+                  <th>Risk</th>
+                  <th>Bias</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody id="holdingsRows"></tbody>
             </table>
+          </div>
+        </article>
+
+        <article class="panel wide-panel rebalance-panel" id="rebalance">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Rebalance engine</p>
+              <h2>Portfolio model and trade recommendations</h2>
+            </div>
+            <span class="data-badge" id="rebalanceStatus">Awaiting run</span>
+          </div>
+
+          <div class="rebalance-layout">
+            <section class="control-surface" aria-label="Portfolio controls">
+              <label>
+                <span>Risk profile</span>
+                <select id="riskProfile">
+                  <option value="conservative">Conservative income</option>
+                  <option value="balanced" selected>Balanced growth</option>
+                  <option value="growth">Growth</option>
+                  <option value="aggressive">Aggressive growth</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Cash reserve target</span>
+                <input id="cashTarget" type="range" min="2" max="20" value="7" />
+                <strong><output id="cashTargetOutput">7%</output></strong>
+              </label>
+
+              <label>
+                <span>Max single position</span>
+                <input id="maxPosition" type="range" min="8" max="30" value="18" />
+                <strong><output id="maxPositionOutput">18%</output></strong>
+              </label>
+
+              <label>
+                <span>Trade threshold</span>
+                <input id="tradeThreshold" type="range" min="0.5" max="5" step="0.5" value="1.5" />
+                <strong><output id="tradeThresholdOutput">1.5%</output></strong>
+              </label>
+
+              <div class="control-actions">
+                <button class="primary-button" id="runRebalance">Run Rebalance</button>
+                <button class="text-button" id="resetPortfolio">Reset sample</button>
+              </div>
+            </section>
+
+            <section class="model-summary" aria-label="Rebalance summary">
+              <div>
+                <span>Model risk score</span>
+                <strong id="riskScore">54</strong>
+                <small id="riskSummary">Balanced exposure with moderate volatility.</small>
+              </div>
+              <div>
+                <span>Estimated trades</span>
+                <strong id="tradeCount">0</strong>
+                <small id="tradeSummary">Run the model to calculate recommendations.</small>
+              </div>
+              <div>
+                <span>Projected cash</span>
+                <strong id="projectedCash">$0</strong>
+                <small id="projectedCashNote">After recommended trades.</small>
+              </div>
+            </section>
+          </div>
+
+          <div class="recommendation-grid">
+            <section>
+              <div class="subheader">
+                <h3>Recommended trades</h3>
+                <span id="recommendationCount">0 actions</span>
+              </div>
+              <div class="table-wrap compact">
+                <table class="trade-table">
+                  <thead>
+                    <tr>
+                      <th>Action</th>
+                      <th>Asset</th>
+                      <th>Amount</th>
+                      <th>Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tradeRows"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section>
+              <div class="subheader">
+                <h3>Target allocation</h3>
+                <span id="allocationHealth">In review</span>
+              </div>
+              <div class="target-bars" id="targetBars"></div>
+            </section>
           </div>
         </article>
 
@@ -181,23 +280,23 @@
           <div class="risk-list">
             <div>
               <span>Realized volatility</span>
-              <meter min="0" max="100" value="46"></meter>
-              <strong>Moderate</strong>
+              <meter id="volatilityMeter" min="0" max="100" value="46"></meter>
+              <strong id="volatilityLabel">Moderate</strong>
             </div>
             <div>
               <span>Concentration</span>
-              <meter min="0" max="100" value="58"></meter>
-              <strong>Watch</strong>
+              <meter id="concentrationMeter" min="0" max="100" value="58"></meter>
+              <strong id="concentrationLabel">Watch</strong>
             </div>
             <div>
               <span>Liquidity</span>
-              <meter min="0" max="100" value="82"></meter>
-              <strong>Strong</strong>
+              <meter id="liquidityMeter" min="0" max="100" value="82"></meter>
+              <strong id="liquidityLabel">Strong</strong>
             </div>
             <div>
               <span>Macro sensitivity</span>
-              <meter min="0" max="100" value="63"></meter>
-              <strong>Elevated</strong>
+              <meter id="macroMeter" min="0" max="100" value="63"></meter>
+              <strong id="macroLabel">Elevated</strong>
             </div>
           </div>
         </article>
