@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Investment Desk Pro</title>
-    <link rel="stylesheet" href="styles.css?v=index-charts-1" />
+    <link rel="stylesheet" href="styles.css?v=watchlist-1" />
+    <link rel="stylesheet" href="watchlist.css?v=watchlist-1" />
   </head>
   <body>
     <aside class="sidebar" aria-label="Trading platform navigation">
@@ -25,7 +26,7 @@
         <a href="#technicals">Technicals</a>
         <a href="#holdings">Portfolio</a>
         <a href="#rebalance">Rebalance</a>
-        <a href="#watchlist">Signals</a>
+        <a href="#watchlist">Watchlist</a>
         <a href="#risk">Risk</a>
       </nav>
 
@@ -357,14 +358,62 @@
           </div>
         </article>
 
-        <article class="panel watchlist-panel" id="watchlist">
+        <article class="panel wide-panel watchlist-panel" id="watchlist">
           <div class="panel-header">
             <div>
-              <p class="eyebrow">Signals</p>
-              <h2>Opportunity radar</h2>
+              <p class="eyebrow">Watchlist</p>
+              <h2>Multi-asset performance monitor</h2>
             </div>
+            <span class="data-badge" id="watchlistStatus">Saved locally</span>
           </div>
-          <div class="watchlist" id="watchlistCards"></div>
+
+          <div class="watchlist-workspace">
+            <section class="watchlist-builder" aria-label="Watchlist builder">
+              <div class="watchlist-controls">
+                <label>
+                  <span>Ticker</span>
+                  <input id="watchTicker" type="text" placeholder="TSLA" autocomplete="off" />
+                </label>
+                <label>
+                  <span>Name</span>
+                  <input id="watchName" type="text" placeholder="Tesla Inc." autocomplete="off" />
+                </label>
+                <label>
+                  <span>Type</span>
+                  <select id="watchType">
+                    <option value="Stock">Stock</option>
+                    <option value="ETF">ETF</option>
+                    <option value="Bond">Bond</option>
+                    <option value="Crypto">Crypto</option>
+                    <option value="Commodity">Commodity</option>
+                    <option value="Currency">Currency</option>
+                    <option value="Alternative">Alternative</option>
+                  </select>
+                </label>
+                <button class="primary-button" id="addWatchItem">Add</button>
+              </div>
+
+              <div class="watchlist" id="watchlistCards"></div>
+            </section>
+
+            <section class="watch-performance" aria-label="Selected watchlist performance">
+              <div class="watch-performance-header">
+                <div>
+                  <span id="watchSelectedType">ETF</span>
+                  <strong id="watchSelectedTicker">SPY</strong>
+                  <small id="watchSelectedName">S&P 500 ETF</small>
+                </div>
+                <b id="watchSelectedChange" class="positive">+0.0%</b>
+              </div>
+              <svg id="watchPerformanceChart" viewBox="0 0 520 220" role="img" aria-label="Selected watchlist performance chart"></svg>
+              <div class="watch-metrics">
+                <div><span>Last price</span><strong id="watchLastPrice">$0.00</strong></div>
+                <div><span>Period return</span><strong id="watchPeriodReturn">0.0%</strong></div>
+                <div><span>Drawdown</span><strong id="watchDrawdown">0.0%</strong></div>
+                <div><span>Source</span><strong id="watchSource">Sample</strong></div>
+              </div>
+            </section>
+          </div>
         </article>
 
         <article class="panel strategy-panel">
@@ -410,8 +459,9 @@
       </section>
     </main>
 
-    <script src="script.js?v=policy-ai-2"></script>
+    <script src="script.js?v=watchlist-1"></script>
     <script src="policy.js?v=policy-ai-2"></script>
-    <script src="markets.js?v=index-charts-1"></script>
+    <script src="markets.js?v=watchlist-1"></script>
+    <script src="watchlist.js?v=watchlist-1"></script>
   </body>
 </html>
