@@ -293,6 +293,117 @@ td,
   gap: 16px;
 }
 
+.index-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.index-card {
+  min-width: 0;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.index-card-top,
+.index-metrics {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.index-card-top div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.index-card-top span,
+.index-metrics span,
+.index-summary span {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.index-card-top strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.index-sparkline {
+  width: 100%;
+  height: 94px;
+}
+
+.index-metrics {
+  align-items: end;
+}
+
+.index-metrics span {
+  display: grid;
+  gap: 3px;
+  text-transform: none;
+}
+
+.index-summary {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.32fr) 1fr;
+  gap: 12px;
+}
+
+.index-summary section {
+  min-width: 0;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.index-summary small {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.breadth-bars {
+  display: grid;
+  gap: 9px;
+}
+
+.breadth-bars > div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.28fr) 1fr 62px;
+  gap: 10px;
+  align-items: center;
+}
+
+.breadth-bars i {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8edf2;
+}
+
+.breadth-bars b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
 .policy-panel {
   display: grid;
   gap: 16px;
@@ -1048,6 +1159,8 @@ meter::-webkit-meter-optimum-value {
   .rebalance-layout,
   .recommendation-grid,
   .data-controls,
+  .index-grid,
+  .index-summary,
   .policy-layout,
   .policy-uploader {
     grid-template-columns: 1fr;
@@ -1109,6 +1222,7 @@ meter::-webkit-meter-optimum-value {
 
   .control-surface,
   .target-bar > div:first-child,
+  .breadth-bars > div,
   .policy-adjustments {
     grid-template-columns: 1fr;
   }
