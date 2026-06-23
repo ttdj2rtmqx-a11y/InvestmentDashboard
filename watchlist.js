@@ -64,7 +64,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem(WATCHLIST_STORAGE_KEY));
       if (!Array.isArray(saved) || !saved.length) return defaultWatchlist.map(normalizeWatchItem);
-      return saved.slice(0, MAX_WATCHLIST_ITEMS).map(normalizeWatchItem);
+      return saved.slice(0, MAX_WATCHLIST_ITEMS).map(normalizeWatchItem).filter((item) => item.ticker);
     } catch {
       return defaultWatchlist.map(normalizeWatchItem);
     }
@@ -72,6 +72,11 @@
 
   function saveWatchlist() {
     localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchlistState));
+  }
+
+  function setStatus(message) {
+    const status = $("#watchlistStatus");
+    if (status) status.textContent = message;
   }
 
   function makePath(points, width, height, padding) {
@@ -104,11 +109,12 @@
     return `<svg class="watch-mini-line" viewBox="0 0 140 32" aria-hidden="true"><path d="${path}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"></path></svg>`;
   }
 
-  function renderWatchlist() {
+  function renderWatchlist(message) {
     if (!$("#watchlistCards")) return;
     if (!watchlistState.length) {
       watchlistState = defaultWatchlist.map(normalizeWatchItem);
       selectedTicker = watchlistState[0].ticker;
+      saveWatchlist();
     }
     if (!watchlistState.some((item) => item.ticker === selectedTicker)) selectedTicker = watchlistState[0]?.ticker || "";
 
@@ -119,8 +125,8 @@
           <button class="watch-card ${selected ? "active" : ""}" data-watch-ticker="${item.ticker}" type="button" aria-pressed="${selected}">
             <div class="watch-card-top">
               <div>
-                <span class="watch-card-type">${item.type}</span>
-                <strong>${item.ticker}</strong>
+                <span class="watch-card-type">${escapeHTML(item.type)}</span>
+                <strong>${escapeHTML(item.ticker)}</strong>
                 <small>${escapeHTML(item.name)}</small>
               </div>
               <span class="signal-pill ${trendClass(item.change)}">${item.change >= 0 ? "+" : ""}${pct(item.change)}</span>
@@ -130,13 +136,18 @@
               <span>${escapeHTML(item.signal)}</span>
               <b>${priceMoney(item.price)}</b>
             </div>
+            <span class="watch-remove" data-remove-watch="${item.ticker}" role="button" aria-label="Remove ${item.ticker}" title="Remove ${item.ticker}">×</span>
           </button>
         `;
       })
       .join("");
 
-    $("#watchlistStatus").textContent = `${watchlistState.length} watched assets`;
-    $("#addWatchItem").disabled = watchlistState.length >= MAX_WATCHLIST_ITEMS;
+    const isFull = watchlistState.length >= MAX_WATCHLIST_ITEMS;
+    $("#addWatchItem").disabled = isFull;
+    $("#watchTicker").disabled = isFull;
+    $("#watchName").disabled = isFull;
+    $("#watchType").disabled = isFull;
+    setStatus(message || `${watchlistState.length} watched assets`);
     renderWatchPerformance();
   }
 
@@ -177,20 +188,32 @@
   }
 
   function createWatchItem() {
-    const ticker = $("#watchTicker").value.trim().toUpperCase();
-    if (!ticker || watchlistState.length >= MAX_WATCHLIST_ITEMS) return;
+    const tickerInput = $("#watchTicker");
+    const nameInput = $("#watchName");
+    const typeInput = $("#watchType");
+    const ticker = tickerInput.value.trim().toUpperCase();
+    if (!ticker) {
+      setStatus("Enter a ticker");
+      tickerInput.focus();
+      return;
+    }
+    if (watchlistState.length >= MAX_WATCHLIST_ITEMS) {
+      setStatus("Watchlist full");
+      return;
+    }
     const existing = watchlistState.find((item) => item.ticker === ticker);
     if (existing) {
       selectedTicker = existing.ticker;
-      renderWatchlist();
+      renderWatchlist(`${ticker} already watched`);
       return;
     }
+
     const seed = ticker.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
     const series = Array.from({ length: 12 }, (_, index) => 100 + Math.sin((index + seed) / 2) * 2.6 + index * ((seed % 7) - 2) * 0.18);
     const item = normalizeWatchItem({
       ticker,
-      name: $("#watchName").value.trim() || `${ticker} watch item`,
-      type: $("#watchType").value,
+      name: nameInput.value.trim() || `${ticker} watch item`,
+      type: typeInput.value,
       price: 100 + (seed % 180),
       change: ((seed % 60) - 24) / 10,
       signal: "Manual watch",
@@ -200,9 +223,17 @@
     watchlistState.unshift(item);
     selectedTicker = item.ticker;
     saveWatchlist();
-    $("#watchTicker").value = "";
-    $("#watchName").value = "";
-    renderWatchlist();
+    tickerInput.value = "";
+    nameInput.value = "";
+    renderWatchlist(`${ticker} added`);
+  }
+
+  function removeWatchItem(ticker) {
+    watchlistState = watchlistState.filter((item) => item.ticker !== ticker);
+    if (!watchlistState.length) watchlistState = defaultWatchlist.map(normalizeWatchItem);
+    selectedTicker = watchlistState[0].ticker;
+    saveWatchlist();
+    renderWatchlist(`${ticker} removed`);
   }
 
   function alphaUrl(params) {
@@ -272,18 +303,66 @@
       }
     }
     saveWatchlist();
-    renderWatchlist();
+    renderWatchlist("Watchlist refreshed");
+  }
+
+  function injectWatchlistFixStyles() {
+    if (document.querySelector("#watchlistFixStyles")) return;
+    const style = document.createElement("style");
+    style.id = "watchlistFixStyles";
+    style.textContent = `
+      .watch-card { position: relative; }
+      .watch-remove {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        place-items: center;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 1.1rem;
+        font-weight: 800;
+        line-height: 1;
+        opacity: 0;
+        transition: background 160ms ease, border-color 160ms ease, color 160ms ease, opacity 160ms ease;
+      }
+      .watch-card:hover .watch-remove,
+      .watch-card.active .watch-remove,
+      .watch-remove:focus-visible { opacity: 1; }
+      .watch-remove:hover { border-color: rgba(217, 79, 79, 0.2); background: #f8ecec; color: var(--red); }
+    `;
+    document.head.appendChild(style);
   }
 
   function bindWatchlist() {
-    $("#addWatchItem")?.addEventListener("click", createWatchItem);
+    $("#addWatchItem")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      createWatchItem();
+    }, true);
     $("#watchTicker")?.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") createWatchItem();
+      if (event.key === "Enter") {
+        event.preventDefault();
+        createWatchItem();
+      }
     });
     $("#watchName")?.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") createWatchItem();
+      if (event.key === "Enter") {
+        event.preventDefault();
+        createWatchItem();
+      }
     });
     $("#watchlistCards")?.addEventListener("click", (event) => {
+      const removeButton = event.target.closest("[data-remove-watch]");
+      if (removeButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        removeWatchItem(removeButton.dataset.removeWatch);
+        return;
+      }
       const card = event.target.closest("[data-watch-ticker]");
       if (!card) return;
       selectedTicker = card.dataset.watchTicker;
@@ -296,6 +375,8 @@
 
   function initWatchlist() {
     if (!$("#watchlistCards")) return;
+    window.investmentDeskWatchlistFixVersion = "watchlist-fix-2026-06-23";
+    injectWatchlistFixStyles();
     renderWatchlist();
     bindWatchlist();
   }
