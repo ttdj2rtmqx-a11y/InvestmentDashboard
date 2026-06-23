@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Investment Desk Pro</title>
-    <link rel="stylesheet" href="styles.css?v=policy-ai-2" />
+    <link rel="stylesheet" href="styles.css?v=index-charts-1" />
   </head>
   <body>
     <aside class="sidebar" aria-label="Trading platform navigation">
@@ -19,6 +19,7 @@
       <nav class="nav-list">
         <a class="active" href="#overview">Overview</a>
         <a href="#data">Data</a>
+        <a href="#index-charts">Indexes</a>
         <a href="#policy">Policy</a>
         <a href="#market-map">Markets</a>
         <a href="#technicals">Technicals</a>
@@ -99,6 +100,30 @@
               <strong id="marketDataSource">Holdings use sample values until refreshed.</strong>
               <small id="marketDataDetail">Crypto prices refresh from CoinGecko. Equities and ETFs use Alpha Vantage with your key.</small>
             </div>
+          </div>
+        </article>
+
+        <article class="panel wide-panel index-panel" id="index-charts">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Major indexes</p>
+              <h2>Market index chart deck</h2>
+            </div>
+            <span class="data-badge" id="indexDataStatus">Sample index data</span>
+          </div>
+
+          <div class="index-grid" id="indexCards"></div>
+
+          <div class="index-summary">
+            <section>
+              <span>Risk tone</span>
+              <strong id="indexRiskTone">Constructive</strong>
+              <small id="indexRiskDetail">Large-cap momentum is leading the tape.</small>
+            </section>
+            <section>
+              <span>Breadth</span>
+              <div class="breadth-bars" id="indexBreadthBars"></div>
+            </section>
           </div>
         </article>
 
@@ -387,5 +412,6 @@
 
     <script src="script.js?v=policy-ai-2"></script>
     <script src="policy.js?v=policy-ai-2"></script>
+    <script src="markets.js?v=index-charts-1"></script>
   </body>
 </html>
