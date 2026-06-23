@@ -164,9 +164,12 @@
           <div class="panel-header">
             <div>
               <p class="eyebrow">Portfolio</p>
-              <h2>Editable positions - 30 slots</h2>
+              <h2>Editable positions</h2>
             </div>
-            <button class="text-button" id="addHolding">Add holding</button>
+            <div class="panel-actions">
+              <span class="data-badge" id="holdingSlotCount">10 / 30 slots</span>
+              <button class="text-button" id="addHolding">Add holding</button>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="portfolio-table">
@@ -258,7 +261,10 @@
             <section>
               <div class="subheader">
                 <h3>Recommended trades</h3>
-                <span id="recommendationCount">0 actions</span>
+                <div class="panel-actions">
+                  <span id="recommendationCount">0 / 15 actions</span>
+                  <button class="text-button" id="addRecommendation">Add recommendation</button>
+                </div>
               </div>
               <div class="table-wrap compact">
                 <table class="trade-table">
@@ -268,6 +274,7 @@
                       <th>Asset</th>
                       <th>Amount</th>
                       <th>Reason</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody id="tradeRows"></tbody>
@@ -338,6 +345,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=slots30-3f3c511"></script>
+    <script src="script.js?v=portfolio10-recs15-apple-1"></script>
   </body>
 </html>
