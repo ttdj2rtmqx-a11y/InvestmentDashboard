@@ -260,7 +260,7 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  function initPolicyScan() {
     if (!$("#policyFile")) return;
     restoreKey();
     $("#policyFile").addEventListener("change", onPolicyFile);
@@ -275,5 +275,11 @@
         applyPolicy();
       }
     });
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPolicyScan);
+  } else {
+    initPolicyScan();
+  }
 })();
