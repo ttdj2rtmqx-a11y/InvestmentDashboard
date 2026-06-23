@@ -1,0 +1,152 @@
+.yield-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.yield-grid,
+.yield-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.94fr) minmax(360px, 0.56fr);
+  gap: 16px;
+}
+
+.yield-summary,
+.yield-controls,
+.yield-chart-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.yield-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.yield-summary > div {
+  min-height: 96px;
+  padding: 12px;
+  display: grid;
+  align-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.yield-summary span,
+.yield-controls span,
+.yield-bars span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.yield-summary strong {
+  font-size: 1.45rem;
+}
+
+.yield-summary small {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.yield-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.yield-controls label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.yield-controls select {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-weight: 750;
+}
+
+.yield-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--teal);
+}
+
+.yield-chart-card {
+  display: grid;
+  gap: 12px;
+}
+
+#yieldForecastChart {
+  min-height: 260px;
+}
+
+.yield-forecast-line {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.yield-forecast-band {
+  fill: rgba(10, 132, 255, 0.1);
+}
+
+.yield-bars {
+  display: grid;
+  gap: 11px;
+}
+
+.yield-bar {
+  display: grid;
+  gap: 6px;
+}
+
+.yield-bar > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.yield-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8edf2;
+}
+
+.yield-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.yield-table {
+  min-width: 880px;
+}
+
+@media (max-width: 1080px) {
+  .yield-grid,
+  .yield-detail-grid,
+  .yield-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .yield-bar > div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
