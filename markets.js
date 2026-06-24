@@ -343,3 +343,425 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", drawPerformance);
   else drawPerformance();
 })();
+
+(function () {
+  if (window.__investmentDeskTechnicalPatch) return;
+  window.__investmentDeskTechnicalPatch = true;
+
+  const TECHNICAL_STORAGE_KEY = "investmentDeskTechnicalsV1";
+  const DATA_SETTINGS_KEY = "investmentDeskDataSettingsV1";
+  const MAX_TECHNICAL_ITEMS = 40;
+  const categoryOptions = ["Stock", "ETF", "Bond", "Treasury", "Credit", "Commodity", "Crypto", "Currency", "Real estate", "Alternative"];
+  const $ = (selector) => document.querySelector(selector);
+
+  function readSavedSettings() {
+    try {
+      return JSON.parse(localStorage.getItem(DATA_SETTINGS_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function clean(value, fallback = "") {
+    return String(value ?? fallback).trim();
+  }
+
+  function html(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function classFor(value) {
+    try {
+      if (typeof trendClass === "function") return trendClass(value);
+    } catch {
+      // Continue with the local classifier.
+    }
+    const text = String(value || "").toLowerCase();
+    if (text.includes("up") || text.includes("buy") || text.includes("bull") || text.includes("positive") || text.includes("oversold")) return "positive";
+    if (text.includes("down") || text.includes("hedge") || text.includes("negative") || text.includes("extended")) return "negative";
+    return "neutral";
+  }
+
+  function renderSignal(label) {
+    try {
+      if (typeof signalPill === "function") return signalPill(html(label));
+    } catch {
+      // Continue with the local pill.
+    }
+    return `<span class="signal-pill ${classFor(label)}">${html(label)}</span>`;
+  }
+
+  function renderRsi(value) {
+    const rsi = Math.round(Number(value || 50));
+    try {
+      if (typeof rsiPill === "function") return rsiPill(rsi);
+    } catch {
+      // Continue with the local RSI badge.
+    }
+    const state = rsi >= 70 ? "Overbought" : rsi <= 35 ? "Oversold" : rsi > 55 ? "Bullish" : "Neutral";
+    return `<span class="rsi"><strong>${rsi}</strong><small>${state}</small></span>`;
+  }
+
+  function normalizeItem(item = {}) {
+    const ticker = clean(item.ticker).toUpperCase().replace(/[^A-Z0-9.^=-]/g, "");
+    return {
+      ticker,
+      name: clean(item.name, ticker ? `${ticker} instrument` : "New instrument"),
+      category: clean(item.category, "Stock"),
+      trend: clean(item.trend, "Refresh needed"),
+      rsi: Number.isFinite(Number(item.rsi)) ? Math.round(Number(item.rsi)) : 50,
+      macd: clean(item.macd, "Refresh"),
+      dma: clean(item.dma, "0.0%"),
+      atr: clean(item.atr, "0.0%"),
+      signal: clean(item.signal, "Connect data"),
+      series: Array.isArray(item.series) ? item.series : [],
+    };
+  }
+
+  function defaultItems() {
+    try {
+      if (Array.isArray(technicals) && technicals.length) return technicals.map(normalizeItem);
+    } catch {
+      // Fall through to a compact default list.
+    }
+    return [
+      { ticker: "SPY", name: "S&P 500 ETF", category: "ETF" },
+      { ticker: "QQQ", name: "Nasdaq 100 ETF", category: "ETF" },
+      { ticker: "TLT", name: "20+ Year Treasury ETF", category: "Treasury" },
+      { ticker: "HYG", name: "High Yield Bond ETF", category: "Credit" },
+      { ticker: "GLD", name: "Gold Trust", category: "Commodity" },
+      { ticker: "BTC", name: "Bitcoin", category: "Crypto" },
+    ].map(normalizeItem);
+  }
+
+  function loadItems() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(TECHNICAL_STORAGE_KEY));
+      if (Array.isArray(saved) && saved.length) return saved.map(normalizeItem).filter((item) => item.ticker).slice(0, MAX_TECHNICAL_ITEMS);
+    } catch {
+      // Ignore corrupt browser storage and rebuild from defaults.
+    }
+    return defaultItems();
+  }
+
+  function writeItems(items) {
+    localStorage.setItem(TECHNICAL_STORAGE_KEY, JSON.stringify(items.map(normalizeItem).filter((item) => item.ticker)));
+  }
+
+  function syncGlobalItems(items) {
+    try {
+      if (Array.isArray(technicals)) {
+        technicals.splice(0, technicals.length, ...items);
+        return;
+      }
+    } catch {
+      // Continue to expose the data on window for any future scripts.
+    }
+    window.technicals = items;
+  }
+
+  function currentItems() {
+    try {
+      if (Array.isArray(technicals)) return technicals;
+    } catch {
+      // Fall through to window-scoped data.
+    }
+    return Array.isArray(window.technicals) ? window.technicals : [];
+  }
+
+  function setTechnicalStatus(text, state = "neutral") {
+    const badge = $("#technicalDataStatus");
+    if (!badge) return;
+    badge.textContent = text;
+    badge.className = `data-badge ${state}`;
+  }
+
+  function renderInteractiveTechnicals() {
+    ensureTechnicalControls();
+    const rows = currentItems()
+      .map((item, index) => {
+        const ticker = clean(item.ticker).toUpperCase();
+        const initials = html(ticker.slice(0, 3) || "NA");
+        return `
+          <tr>
+            <td>
+              <div class="asset-cell">
+                <span class="ticker">${initials}</span>
+                <div>
+                  <strong>${html(ticker)}</strong><br />
+                  <span>${html(item.name)}</span>
+                </div>
+              </div>
+            </td>
+            <td>${html(item.category)}</td>
+            <td>${renderSignal(item.trend)}</td>
+            <td>${renderRsi(item.rsi)}</td>
+            <td>${renderSignal(item.macd)}</td>
+            <td class="${classFor(item.dma)}">${html(item.dma)}</td>
+            <td>${html(item.atr)}</td>
+            <td>
+              <div class="technical-action-cell">
+                ${renderSignal(item.signal)}
+                <button class="technical-remove" type="button" data-remove-technical="${index}" aria-label="Remove ${html(ticker)} from technical analysis">&times;</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+    const body = $("#technicalRows");
+    if (body) body.innerHTML = rows || `<tr><td colspan="8"><div class="empty-state">Add an instrument to start building your technical matrix.</div></td></tr>`;
+    const count = currentItems().length;
+    const hasKey = Boolean(readSavedSettings().alphaVantageKey);
+    setTechnicalStatus(hasKey ? `${count} tracked · live ready` : `${count} tracked · key needed`, hasKey ? "positive" : "neutral");
+    const counter = $("#technicalCount");
+    if (counter) counter.textContent = `${count}/${MAX_TECHNICAL_ITEMS}`;
+  }
+
+  function injectTechnicalStyles() {
+    if ($("#technicalPatchStyles")) return;
+    const style = document.createElement("style");
+    style.id = "technicalPatchStyles";
+    style.textContent = `
+      .technical-builder {
+        display: grid;
+        gap: 10px;
+        margin: 14px 0 4px;
+      }
+      .technical-controls {
+        grid-template-columns: minmax(90px, 0.4fr) minmax(180px, 1fr) minmax(140px, 0.55fr) auto auto;
+      }
+      .technical-builder-actions {
+        display: flex;
+        gap: 8px;
+        align-items: end;
+      }
+      .technical-builder-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+      .technical-action-cell {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .technical-remove {
+        width: 30px;
+        min-height: 30px;
+        padding: 0;
+        border: 1px solid rgba(217, 79, 79, 0.22);
+        border-radius: 999px;
+        background: rgba(217, 79, 79, 0.07);
+        color: #b33a3a;
+        font-size: 1rem;
+        font-weight: 900;
+        cursor: pointer;
+      }
+      .technical-remove:hover {
+        background: rgba(217, 79, 79, 0.12);
+      }
+      @media (max-width: 820px) {
+        .technical-controls {
+          grid-template-columns: 1fr;
+        }
+        .technical-builder-actions,
+        .technical-action-cell {
+          justify-content: flex-start;
+        }
+      }
+    `;
+    document.head.append(style);
+  }
+
+  function ensureTechnicalControls() {
+    const panel = $("#technicals");
+    const tableWrap = panel?.querySelector(".table-wrap");
+    if (!panel || !tableWrap || $("#technicalBuilder")) return;
+    injectTechnicalStyles();
+    const builder = document.createElement("div");
+    builder.className = "technical-builder";
+    builder.id = "technicalBuilder";
+    builder.innerHTML = `
+      <div class="watchlist-controls technical-controls">
+        <label>
+          <span>Ticker</span>
+          <input id="technicalTickerInput" type="text" placeholder="AAPL, BND, BTC" autocomplete="off" />
+        </label>
+        <label>
+          <span>Name</span>
+          <input id="technicalNameInput" type="text" placeholder="Instrument name" autocomplete="off" />
+        </label>
+        <label>
+          <span>Category</span>
+          <select id="technicalCategoryInput">
+            ${categoryOptions.map((category) => `<option value="${html(category)}">${html(category)}</option>`).join("")}
+          </select>
+        </label>
+        <button class="primary-button" id="addTechnicalItem" type="button">Add</button>
+        <button class="text-button" id="refreshTechnicals" type="button">Refresh</button>
+      </div>
+      <div class="technical-builder-meta">
+        <span id="technicalHelper">Custom technical universe</span>
+        <strong id="technicalCount">0/${MAX_TECHNICAL_ITEMS}</strong>
+      </div>
+    `;
+    tableWrap.before(builder);
+  }
+
+  function addTechnicalItem() {
+    const tickerInput = $("#technicalTickerInput");
+    const nameInput = $("#technicalNameInput");
+    const categoryInput = $("#technicalCategoryInput");
+    const ticker = clean(tickerInput?.value).toUpperCase().replace(/[^A-Z0-9.^=-]/g, "");
+    if (!ticker) {
+      tickerInput?.focus();
+      setTechnicalStatus("Enter a ticker", "negative");
+      return;
+    }
+    const items = currentItems().map(normalizeItem);
+    if (items.some((item) => item.ticker === ticker)) {
+      setTechnicalStatus(`${ticker} already tracked`, "neutral");
+      return;
+    }
+    if (items.length >= MAX_TECHNICAL_ITEMS) {
+      setTechnicalStatus(`Limit is ${MAX_TECHNICAL_ITEMS} instruments`, "negative");
+      return;
+    }
+    const nextItem = normalizeItem({
+      ticker,
+      name: clean(nameInput?.value, `${ticker} instrument`),
+      category: clean(categoryInput?.value, "Stock"),
+    });
+    items.push(nextItem);
+    syncGlobalItems(items);
+    writeItems(items);
+    if (tickerInput) tickerInput.value = "";
+    if (nameInput) nameInput.value = "";
+    renderInteractiveTechnicals();
+    refreshSingleTechnical(nextItem, items.length - 1);
+  }
+
+  async function refreshSingleTechnical(item, index) {
+    const settings = readSavedSettings();
+    const ticker = clean(item.ticker).toUpperCase();
+    const items = currentItems();
+    if (!settings.alphaVantageKey) {
+      setTechnicalStatus("Add market-data key", "neutral");
+      return false;
+    }
+    try {
+      let updated;
+      if (typeof fetchDailySeries === "function" && typeof technicalFromSeries === "function") {
+        updated = technicalFromSeries(item, await fetchDailySeries(ticker));
+      } else {
+        throw new Error("Technical engine unavailable");
+      }
+      items.splice(index, 1, normalizeItem(updated));
+      writeItems(items);
+      renderInteractiveTechnicals();
+      return true;
+    } catch (error) {
+      items[index] = normalizeItem({
+        ...item,
+        trend: item.trend || "Refresh needed",
+        macd: item.macd || "Refresh",
+        signal: clean(error?.message, "Refresh failed").slice(0, 80),
+      });
+      syncGlobalItems(items);
+      writeItems(items);
+      renderInteractiveTechnicals();
+      return false;
+    }
+  }
+
+  async function refreshTechnicalMatrix() {
+    const button = $("#refreshTechnicals");
+    const items = currentItems().map(normalizeItem);
+    if (!items.length) {
+      setTechnicalStatus("Add instruments first", "neutral");
+      return;
+    }
+    if (!readSavedSettings().alphaVantageKey) {
+      setTechnicalStatus("Add market-data key", "neutral");
+      return;
+    }
+    if (button) {
+      button.disabled = true;
+      button.textContent = "Refreshing...";
+    }
+    setTechnicalStatus("Refreshing technicals", "neutral");
+    let updated = 0;
+    let failed = 0;
+    try {
+      for (let index = 0; index < items.length; index += 1) {
+        const ok = await refreshSingleTechnical(items[index], index);
+        if (ok) updated += 1;
+        else failed += 1;
+      }
+      setTechnicalStatus(failed ? `${updated} live · ${failed} need review` : `${updated} live technicals`, failed ? "neutral" : "positive");
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Refresh";
+      }
+    }
+  }
+
+  function bindTechnicalControls() {
+    document.addEventListener("click", (event) => {
+      const addButton = event.target.closest("#addTechnicalItem");
+      const refreshButton = event.target.closest("#refreshTechnicals");
+      const removeButton = event.target.closest("[data-remove-technical]");
+      if (addButton) addTechnicalItem();
+      if (refreshButton) refreshTechnicalMatrix();
+      if (removeButton) {
+        const index = Number(removeButton.dataset.removeTechnical);
+        const items = currentItems().map(normalizeItem);
+        if (Number.isInteger(index) && items[index]) {
+          items.splice(index, 1);
+          syncGlobalItems(items);
+          writeItems(items);
+          renderInteractiveTechnicals();
+        }
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && event.target.closest("#technicalBuilder")) {
+        event.preventDefault();
+        addTechnicalItem();
+      }
+    });
+    $("#refreshMarketData")?.addEventListener("click", () => {
+      window.setTimeout(refreshTechnicalMatrix, 900);
+    });
+    $("#saveMarketDataKey")?.addEventListener("click", () => {
+      window.setTimeout(renderInteractiveTechnicals, 100);
+    });
+  }
+
+  function initTechnicalPatch() {
+    const items = loadItems();
+    syncGlobalItems(items);
+    ensureTechnicalControls();
+    try {
+      if (typeof renderTechnicals === "function") renderTechnicals = renderInteractiveTechnicals;
+    } catch {
+      window.renderTechnicals = renderInteractiveTechnicals;
+    }
+    bindTechnicalControls();
+    renderInteractiveTechnicals();
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initTechnicalPatch);
+  else initTechnicalPatch();
+})();
