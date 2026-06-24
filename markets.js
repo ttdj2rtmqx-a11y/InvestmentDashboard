@@ -1,14 +1,15 @@
 (function () {
   const DATA_SETTINGS_KEY = "investmentDeskDataSettingsV1";
   const ALPHA_VANTAGE_URL = "https://www.alphavantage.co/query";
+  const waitingSeries = Array.from({ length: 12 }, () => 100);
   const indexModels = [
-    { symbol: "SPY", label: "S&P 500", color: "#0a84ff", series: [100, 101.2, 100.4, 102.6, 104.1, 103.7, 105.2, 107.1, 108.4, 107.8, 110.2, 111.6] },
-    { symbol: "QQQ", label: "Nasdaq 100", color: "#7c5cff", series: [100, 102.6, 101.7, 105.4, 107.9, 109.2, 108.6, 112.8, 115.4, 114.6, 118.9, 121.2] },
-    { symbol: "DIA", label: "Dow 30", color: "#1f9d63", series: [100, 100.6, 100.1, 101.3, 102.2, 102.8, 103.4, 104.2, 105.5, 105.1, 106.7, 107.4] },
-    { symbol: "IWM", label: "Russell 2000", color: "#c48a22", series: [100, 99.2, 98.5, 100.7, 101.5, 99.9, 102.1, 103.8, 102.7, 104.6, 106.3, 105.8] },
-    { symbol: "EFA", label: "Developed ex-US", color: "#3867d6", series: [100, 100.3, 99.7, 101.1, 102.4, 101.8, 103.2, 104.1, 105.2, 104.7, 106.1, 107.0] },
+    { symbol: "SPY", label: "S&P 500", color: "#0a84ff", series: waitingSeries },
+    { symbol: "QQQ", label: "Nasdaq 100", color: "#7c5cff", series: waitingSeries },
+    { symbol: "DIA", label: "Dow 30", color: "#1f9d63", series: waitingSeries },
+    { symbol: "IWM", label: "Russell 2000", color: "#c48a22", series: waitingSeries },
+    { symbol: "EFA", label: "Developed ex-US", color: "#3867d6", series: waitingSeries },
   ];
-  let indexState = indexModels.map((item) => ({ ...item, source: "Sample" }));
+  let indexState = indexModels.map((item) => ({ ...item, source: "Refresh needed" }));
 
   const $ = (selector) => document.querySelector(selector);
 
@@ -89,9 +90,10 @@
     const metrics = indexState.map((item) => ({ item, ...indexMetrics(item.series) }));
     const positive = metrics.filter((item) => item.oneDay >= 0).length;
     const averagePeriod = metrics.reduce((sum, item) => sum + item.period, 0) / metrics.length;
-    const riskTone = averagePeriod > 8 && positive >= 4 ? "Risk-on" : averagePeriod > 2 && positive >= 3 ? "Constructive" : positive >= 3 ? "Mixed" : "Defensive";
+    const hasLiveData = indexState.some((item) => item.source === "Alpha Vantage");
+    const riskTone = !hasLiveData ? "Connect data" : averagePeriod > 8 && positive >= 4 ? "Risk-on" : averagePeriod > 2 && positive >= 3 ? "Constructive" : positive >= 3 ? "Mixed" : "Defensive";
     $("#indexRiskTone").textContent = riskTone;
-    $("#indexRiskDetail").textContent = `${positive} of ${metrics.length} indexes are positive on the latest session.`;
+    $("#indexRiskDetail").textContent = hasLiveData ? `${positive} of ${metrics.length} indexes are positive on the latest session.` : "Save an Alpha Vantage key and refresh to load live index history.";
     $("#indexBreadthBars").innerHTML = metrics
       .map(({ item, oneDay }) => `
         <div>
@@ -124,7 +126,7 @@
   async function refreshIndexes() {
     const apiKey = savedApiKey();
     if (!apiKey) {
-      setIndexStatus("Sample index data", "neutral");
+      setIndexStatus("Live key needed", "neutral");
       renderIndexCards();
       return;
     }
@@ -137,12 +139,12 @@
         const base = closes[0] || 1;
         updated.push({ ...item, series: closes.map((close) => (close / base) * 100), source: "Alpha Vantage" });
       } catch {
-        updated.push({ ...item, source: "Sample fallback" });
+        updated.push({ ...item, source: "Refresh needed" });
       }
     }
     indexState = updated;
     renderIndexCards();
-    setIndexStatus(updated.some((item) => item.source === "Alpha Vantage") ? "Live index data" : "Sample fallback", updated.some((item) => item.source === "Alpha Vantage") ? "positive" : "negative");
+    setIndexStatus(updated.some((item) => item.source === "Alpha Vantage") ? "Live index data" : "Live data needed", updated.some((item) => item.source === "Alpha Vantage") ? "positive" : "negative");
   }
 
   function initMarketCharts() {
