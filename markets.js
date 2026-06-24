@@ -162,3 +162,184 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initMarketCharts);
   else initMarketCharts();
 })();
+
+(function () {
+  if (window.__investmentDeskPerformancePatch) return;
+  window.__investmentDeskPerformancePatch = true;
+
+  const windows = { "1Y": 60, "3Y": 180, "5Y": 260 };
+  const benchmarkByCategory = {
+    "US equities": "SPY",
+    "International equities": "EFA",
+    "Fixed income": "BND",
+    Credit: "HYG",
+    Commodities: "GLD",
+    "Real estate": "VNQ",
+    "Crypto assets": "BTC",
+    Alternatives: "SPY",
+    Cash: "CASH",
+  };
+  const returnProfiles = {
+    "US equities": { drift: 7.2, wave: 2.4 },
+    "International equities": { drift: 5.8, wave: 2.1 },
+    "Fixed income": { drift: 3.8, wave: 0.8 },
+    Credit: { drift: 5.1, wave: 1.2 },
+    Commodities: { drift: 3.2, wave: 2.7 },
+    "Real estate": { drift: 4.8, wave: 2 },
+    "Crypto assets": { drift: 10.5, wave: 6.4 },
+    Alternatives: { drift: 4.5, wave: 1.5 },
+    Cash: { drift: 2.8, wave: 0.1 },
+  };
+  let selectedWindow = "1Y";
+
+  const $ = (selector) => document.querySelector(selector);
+
+  function pct(value) {
+    return `${value >= 0 ? "+" : ""}${Number(value || 0).toFixed(1)}%`;
+  }
+
+  function normalize(values) {
+    const clean = Array.isArray(values) && values.length ? values.map(Number).filter(Number.isFinite) : [100];
+    const first = clean[0] || 1;
+    return clean.map((value) => Number(((value / first) * 100).toFixed(2)));
+  }
+
+  function activePortfolioHoldings() {
+    try {
+      if (typeof activeHoldings === "function") return activeHoldings().filter((item) => Number(item.value || 0) > 0);
+      return (appState?.holdings || []).filter((item) => String(item.ticker || "").trim() && item.name !== "Open portfolio slot" && Number(item.value || 0) > 0);
+    } catch {
+      return [];
+    }
+  }
+
+  function alignSeries(series, length) {
+    const normalized = normalize(series);
+    if (normalized.length >= length) return normalized.slice(-length);
+    return [...Array.from({ length: length - normalized.length }, () => normalized[0] || 100), ...normalized];
+  }
+
+  function modeledSeries(category, length, risk = 50) {
+    const profile = returnProfiles[category] || returnProfiles.Alternatives;
+    const riskTilt = Math.max(-2.5, Math.min(4.5, (Number(risk || 50) - 50) / 18));
+    const periodDrift = (profile.drift + riskTilt) * (length / 260);
+    return Array.from({ length }, (_, index) => {
+      const progress = length <= 1 ? 0 : index / (length - 1);
+      const wave = Math.sin(progress * Math.PI * 2.35) * profile.wave;
+      const chop = Math.sin(progress * Math.PI * 7.1 + profile.wave) * (profile.wave * 0.34);
+      return Number((100 + periodDrift * progress + wave + chop).toFixed(2));
+    });
+  }
+
+  function path(points, width, height, padding) {
+    const min = Math.min(...points);
+    const max = Math.max(...points);
+    const range = max - min || 1;
+    return points
+      .map((point, index) => {
+        const x = padding + (index * (width - padding * 2)) / Math.max(1, points.length - 1);
+        const y = height - padding - ((point - min) / range) * (height - padding * 2);
+        return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+      })
+      .join(" ");
+  }
+
+  function blend(items, length) {
+    const total = items.reduce((sum, item) => sum + Number(item.weight || 0), 0) || 1;
+    return Array.from({ length }, (_, index) => Number(items.reduce((sum, item) => sum + item.series[index] * (Number(item.weight || 0) / total), 0).toFixed(2)));
+  }
+
+  function holdingSeries(holding, length) {
+    const hasLive = Array.isArray(holding.series) && holding.series.length > 1 && !["Manual", "Sample"].includes(holding.lastPriceSource || holding.source);
+    return {
+      source: hasLive ? "live" : "modeled",
+      series: hasLive ? alignSeries(holding.series, length) : modeledSeries(holding.category || "Alternatives", length, holding.risk),
+      weight: Number(holding.value || 0),
+    };
+  }
+
+  function benchmarkSeries(length) {
+    const targets = riskProfiles?.[appState?.riskProfile]?.categoryTargets || riskProfiles?.balanced?.categoryTargets || {};
+    return blend(
+      Object.entries(targets).map(([category, weight]) => {
+        const ticker = benchmarkByCategory[category];
+        const live = (typeof technicals !== "undefined" ? technicals : []).find((item) => item.ticker === ticker && Array.isArray(item.series) && item.series.length > 1);
+        return { weight, series: live ? alignSeries(live.series, length) : modeledSeries(category, length) };
+      }),
+      length
+    );
+  }
+
+  function drawPerformance() {
+    const svg = $("#lineChart");
+    if (!svg) return;
+    const holdings = activePortfolioHoldings();
+    const width = 720;
+    const height = 300;
+    const padding = 36;
+    const length = windows[selectedWindow] || windows["1Y"];
+
+    document.querySelectorAll(".segmented button").forEach((button) => button.classList.toggle("active", button.textContent.trim() === selectedWindow));
+
+    if (!holdings.length) {
+      svg.innerHTML = `<text x="40" y="140" fill="#6b7280" font-size="18" font-weight="800">Add holdings to build portfolio performance.</text><text x="40" y="172" fill="#8a94a6" font-size="13" font-weight="700">This chart updates from your positions, risk profile, and refreshed market history.</text>`;
+      return;
+    }
+
+    const holdingItems = holdings.map((holding) => holdingSeries(holding, length));
+    const portfolio = blend(holdingItems, length);
+    const benchmark = benchmarkSeries(length);
+    const portfolioPath = path(portfolio, width, height, padding);
+    const benchmarkPath = path(benchmark, width, height, padding);
+    const areaPath = `${portfolioPath} L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`;
+    const liveCount = holdingItems.filter((item) => item.source === "live").length;
+    const source = liveCount === holdings.length ? "Live history" : liveCount ? `${liveCount}/${holdings.length} live histories` : "Modeled until refresh";
+    const gridlines = [0, 1, 2, 3]
+      .map((index) => {
+        const y = padding + index * ((height - padding * 2) / 3);
+        return `<line class="gridline" x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" />`;
+      })
+      .join("");
+
+    svg.innerHTML = `${gridlines}<path class="area-fill" d="${areaPath}" /><path class="line-benchmark" d="${benchmarkPath}" /><path class="line-portfolio" d="${portfolioPath}" /><circle cx="${width - padding}" cy="54" r="6" fill="#0f8f8c" /><text x="${width - padding - 184}" y="58" fill="#17202a" font-size="14" font-weight="800">Portfolio ${pct(portfolio.at(-1) - portfolio[0])}</text><circle cx="${width - padding}" cy="82" r="6" fill="#c88a24" /><text x="${width - padding - 184}" y="86" fill="#17202a" font-size="14" font-weight="800">Benchmark ${pct(benchmark.at(-1) - benchmark[0])}</text><text x="${padding}" y="${height - 12}" fill="#6b7280" font-size="12" font-weight="800">${selectedWindow} · ${source}</text>`;
+  }
+
+  function bindPerformancePatch() {
+    document.querySelectorAll(".segmented button").forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedWindow = button.textContent.trim();
+        drawPerformance();
+      });
+    });
+    document.addEventListener("input", (event) => {
+      if (event.target.closest("#holdingsRows") || event.target.closest("#rebalance")) window.setTimeout(drawPerformance, 0);
+    });
+    document.addEventListener("change", (event) => {
+      if (event.target.closest("#holdingsRows") || event.target.closest("#rebalance")) window.setTimeout(drawPerformance, 0);
+    });
+    document.addEventListener("click", (event) => {
+      if (event.target.closest("#addHolding") || event.target.closest("#resetPortfolio") || event.target.closest("[data-remove]") || event.target.closest("#runRebalance")) {
+        window.setTimeout(drawPerformance, 80);
+      }
+    });
+  }
+
+  try {
+    if (typeof renderChart === "function") renderChart = drawPerformance;
+    if (typeof renderAll === "function" && !window.__investmentDeskRenderAllPerformanceWrapped) {
+      const originalRenderAll = renderAll;
+      renderAll = function (...args) {
+        const result = originalRenderAll.apply(this, args);
+        drawPerformance();
+        return result;
+      };
+      window.__investmentDeskRenderAllPerformanceWrapped = true;
+    }
+  } catch {
+    window.renderChart = drawPerformance;
+  }
+
+  bindPerformancePatch();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", drawPerformance);
+  else drawPerformance();
+})();
