@@ -89,11 +89,12 @@
               <span>Equity and ETF source</span>
               <select id="marketDataProvider">
                 <option value="alphaVantage">Alpha Vantage</option>
+                <option value="finnhub">Finnhub (free)</option>
               </select>
             </label>
             <label>
               <span>API key</span>
-              <input id="marketDataKey" type="password" placeholder="Paste Alpha Vantage key" autocomplete="off" />
+              <input id="marketDataKey" type="password" placeholder="Paste provider API key" autocomplete="off" />
             </label>
             <div class="control-actions">
               <button class="primary-button" id="refreshMarketData">Refresh Live Data</button>
@@ -101,7 +102,7 @@
             </div>
             <div class="source-note">
               <strong id="marketDataSource">Holdings use sample values until refreshed.</strong>
-              <small id="marketDataDetail">Crypto prices refresh from CoinGecko. Equities and ETFs use Alpha Vantage with your key.</small>
+              <small id="marketDataDetail">Crypto prices refresh from CoinGecko. Equities, ETFs, funds, indexes, and technicals use your selected provider.</small>
             </div>
           </div>
         </article>
@@ -555,5 +556,6 @@
     <script src="markets.js?v=technical-matrix-1"></script>
     <script src="watchlist.js?v=watchlist-1"></script>
     <script src="yield.js?v=yield-1"></script>
+    <script src="enhancements.js?v=finnhub-expand-1"></script>
   </body>
 </html>
