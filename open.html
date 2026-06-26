@@ -19,6 +19,9 @@
         var response = await fetch("index.html?fresh=" + version, { cache: "no-store" });
         var html = await response.text();
         html = html.replace(/enhancements\.js\?v=[^"]+/g, "enhancements.js?v=" + version);
+        if (!/municipal-rates\.js/.test(html)) {
+          html = html.replace("</body>", '<script src="municipal-rates.js?v=' + version + '"><\\/script></body>');
+        }
         document.open();
         document.write(html);
         document.close();
