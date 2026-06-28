@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Investment Desk Pro</title>
     <link rel="stylesheet" href="styles.css?v=watchlist-1" />
-    <link rel="stylesheet" href="watchlist.css?v=watchlist-1" />
+    <link rel="stylesheet" href="watchlist.css?v=watchlist-fix-1" />
     <link rel="stylesheet" href="yield.css?v=yield-1" />
+    <link rel="stylesheet" href="ui-polish.css?v=ui-polish-1" />
   </head>
   <body>
     <aside class="sidebar" aria-label="Trading platform navigation">
@@ -21,6 +22,7 @@
       <nav class="nav-list">
         <a class="active" href="#overview">Overview</a>
         <a href="#data">Data</a>
+        <a href="#kelowna-macro">Kelowna</a>
         <a href="#index-charts">Indexes</a>
         <a href="#policy">Policy</a>
         <a href="#market-map">Markets</a>
@@ -81,7 +83,7 @@
               <p class="eyebrow">Market data</p>
               <h2>Live data connection</h2>
             </div>
-            <span class="data-badge" id="marketDataStatus">Sample mode</span>
+            <span class="data-badge" id="marketDataStatus">Live key needed</span>
           </div>
 
           <div class="data-controls">
@@ -101,9 +103,45 @@
               <button class="text-button" id="saveMarketDataKey">Save key</button>
             </div>
             <div class="source-note">
-              <strong id="marketDataSource">Holdings use sample values until refreshed.</strong>
+              <strong id="marketDataSource">Holdings use your entries until refreshed.</strong>
               <small id="marketDataDetail">Crypto prices refresh from CoinGecko. Equities, ETFs, funds, indexes, and technicals use your selected provider.</small>
             </div>
+          </div>
+        </article>
+
+        <article class="panel wide-panel kelowna-panel" id="kelowna-macro">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Kelowna macro</p>
+              <h2>Local economic dashboard</h2>
+            </div>
+            <div class="panel-actions">
+              <span class="data-badge" id="kelownaMacroStatus">Loading public data</span>
+              <button class="text-button" id="refreshKelownaMacro">Refresh</button>
+            </div>
+          </div>
+
+          <div class="kelowna-macro-grid collapsed" id="kelownaMacroCards"></div>
+          <button class="text-button kelowna-expand" id="toggleKelownaMetrics">Show all metrics</button>
+
+          <div class="kelowna-macro-detail">
+            <section class="kelowna-chart-card" aria-label="Kelowna labour market trend">
+              <div class="subheader">
+                <h3>Labour market trend</h3>
+                <span id="kelownaMacroDate">Awaiting source</span>
+              </div>
+              <svg id="kelownaMacroChart" viewBox="0 0 720 240" role="img" aria-label="Kelowna labour market chart"></svg>
+            </section>
+
+            <section class="kelowna-insight-card" aria-label="Kelowna macro interpretation">
+              <div>
+                <span>Macro read</span>
+                <strong id="kelownaMacroLens">Loading</strong>
+                <small id="kelownaMacroSummary">Connecting to open public data sources.</small>
+              </div>
+              <ul id="kelownaMacroDrivers"></ul>
+              <small id="kelownaMacroSources">Statistics Canada Web Data Service</small>
+            </section>
           </div>
         </article>
 
@@ -113,7 +151,7 @@
               <p class="eyebrow">Major indexes</p>
               <h2>Market index chart deck</h2>
             </div>
-            <span class="data-badge" id="indexDataStatus">Sample index data</span>
+            <span class="data-badge" id="indexDataStatus">Live key needed</span>
           </div>
 
           <div class="index-grid" id="indexCards"></div>
@@ -208,7 +246,7 @@
               <p class="eyebrow">Technical analysis</p>
               <h2>Cross-asset indicator matrix</h2>
             </div>
-            <span class="data-badge" id="technicalDataStatus">Sample EOD data</span>
+            <span class="data-badge" id="technicalDataStatus">Live key needed</span>
           </div>
           <div class="table-wrap">
             <table class="technical-table">
@@ -239,6 +277,22 @@
               <span class="data-badge" id="holdingSlotCount">10 / 30 slots</span>
               <button class="text-button" id="addHolding">Add holding</button>
             </div>
+          </div>
+          <div class="statement-import" aria-label="Investment statement import">
+            <label class="file-drop statement-drop">
+              <span>Upload investment statement</span>
+              <input id="statementFile" type="file" accept=".txt,.csv,.json,.html,.pdf,.docx" />
+              <strong id="statementFileName">Choose statement</strong>
+            </label>
+            <div class="statement-actions">
+              <button class="primary-button" id="scanStatement">Scan statement</button>
+              <button class="text-button" id="applyStatementHoldings">Populate portfolio</button>
+            </div>
+            <div class="statement-status">
+              <span class="data-badge" id="statementStatus">No statement</span>
+              <small id="statementSummary">Upload a brokerage or custodian statement to identify holdings, quantities, and market values.</small>
+            </div>
+            <div class="statement-preview" id="statementPreview"></div>
           </div>
           <div class="table-wrap">
             <table class="portfolio-table">
@@ -392,7 +446,7 @@
 
               <div class="control-actions">
                 <button class="primary-button" id="runRebalance">Run Rebalance</button>
-                <button class="text-button" id="resetPortfolio">Reset sample</button>
+                <button class="text-button" id="resetPortfolio">Clear portfolio</button>
               </div>
             </section>
 
@@ -502,7 +556,7 @@
                 <div><span>Last price</span><strong id="watchLastPrice">$0.00</strong></div>
                 <div><span>Period return</span><strong id="watchPeriodReturn">0.0%</strong></div>
                 <div><span>Drawdown</span><strong id="watchDrawdown">0.0%</strong></div>
-                <div><span>Source</span><strong id="watchSource">Sample</strong></div>
+                <div><span>Source</span><strong id="watchSource">Refresh needed</strong></div>
               </div>
             </section>
           </div>
@@ -551,11 +605,15 @@
       </section>
     </main>
 
-    <script src="script.js?v=watchlist-1"></script>
+    <script src="script.js?v=performance-live-1"></script>
     <script src="policy.js?v=policy-ai-2"></script>
-    <script src="markets.js?v=technical-matrix-1"></script>
-    <script src="watchlist.js?v=watchlist-1"></script>
-    <script src="yield.js?v=yield-1"></script>
-    <script src="enhancements.js?v=finnhub-expand-1"></script>
+    <script src="markets.js?v=live-data-1"></script>
+    <script src="yield.js?v=live-data-1"></script>
+    <script src="watchlist-fix.js?v=watchlist-fix-1"></script>
+    <script src="enhancements.js?v=index-refresh-1"></script>
+    <script src="municipal-rates.js?v=municipal-rates-1"></script>
+    <script src="statement-import.js?v=statement-import-1"></script>
+    <script src="kelowna-macro.js?v=kelowna-macro-1"></script>
+    <script src="ui-polish.js?v=ui-polish-1"></script>
   </body>
 </html>
