@@ -22,6 +22,7 @@
         if (!/ui-polish\.css/.test(html)) {
           html = html.replace("</head>", '<link rel="stylesheet" href="ui-polish.css?v=' + version + '" /></head>');
         }
+        html = html.replace(/watchlist-fix\.js\?v=[^"]+/g, "watchlist-fix.js?v=" + version);
         html = html.replace(/enhancements\.js\?v=[^"]+/g, "enhancements.js?v=" + version);
         if (!/municipal-rates\.js/.test(html)) {
           html = html.replace("</body>", '<script src="municipal-rates.js?v=' + version + '"><\/script></body>');
