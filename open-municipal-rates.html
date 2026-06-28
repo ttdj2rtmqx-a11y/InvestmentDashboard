@@ -18,9 +18,17 @@
         var hash = window.location.hash || "";
         var response = await fetch("index.html?fresh=" + version, { cache: "no-store" });
         var html = await response.text();
+        html = html.replace(/ui-polish\.css\?v=[^"]+/g, "ui-polish.css?v=" + version);
+        if (!/ui-polish\.css/.test(html)) {
+          html = html.replace("</head>", '<link rel="stylesheet" href="ui-polish.css?v=' + version + '" /></head>');
+        }
         html = html.replace(/enhancements\.js\?v=[^"]+/g, "enhancements.js?v=" + version);
         if (!/municipal-rates\.js/.test(html)) {
           html = html.replace("</body>", '<script src="municipal-rates.js?v=' + version + '"><\/script></body>');
+        }
+        html = html.replace(/ui-polish\.js\?v=[^"]+/g, "ui-polish.js?v=" + version);
+        if (!/ui-polish\.js/.test(html)) {
+          html = html.replace("</body>", '<script src="ui-polish.js?v=' + version + '"><\/script></body>');
         }
         document.open();
         document.write(html);
