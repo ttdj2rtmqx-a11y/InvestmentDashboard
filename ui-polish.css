@@ -1,0 +1,502 @@
+:root {
+  --ink: #17201d;
+  --muted: #66736f;
+  --line: rgba(23, 32, 29, 0.1);
+  --paper: #f6f8f5;
+  --panel: rgba(255, 255, 255, 0.88);
+  --panel-solid: #ffffff;
+  --teal: #0f766e;
+  --green: #21855f;
+  --red: #c64f4f;
+  --blue: #4267d6;
+  --amber: #b67919;
+  --violet: #7a61c9;
+  --navy: #17201d;
+  --shadow: 0 16px 42px rgba(23, 32, 29, 0.075);
+  --soft-shadow: 0 8px 22px rgba(23, 32, 29, 0.06);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  grid-template-columns: 264px minmax(0, 1fr);
+  background:
+    linear-gradient(140deg, rgba(15, 118, 110, 0.08), transparent 32rem),
+    linear-gradient(180deg, #fbfcfb 0%, var(--paper) 46%, #eef3f1 100%);
+  line-height: 1.45;
+}
+
+main {
+  width: min(1460px, 100%);
+  padding: 28px clamp(22px, 3vw, 36px);
+}
+
+.sidebar {
+  padding: 24px 20px;
+  gap: 22px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 30%),
+    linear-gradient(180deg, #10201d 0%, #171a18 100%);
+}
+
+.brand {
+  gap: 11px;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f6fff9 0%, #cfe8df 100%);
+  color: #0b4c46;
+}
+
+.brand strong {
+  display: block;
+  line-height: 1.15;
+}
+
+.brand small,
+.market-note small {
+  color: #b8c9c1;
+  line-height: 1.35;
+}
+
+.nav-list {
+  gap: 4px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.nav-list a {
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: #d5dfda;
+  font-size: 0.92rem;
+}
+
+.nav-list a.active,
+.nav-list a:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.market-note {
+  padding: 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.topbar {
+  min-height: 64px;
+}
+
+.topbar,
+.panel-header {
+  gap: 14px;
+}
+
+h1 {
+  font-size: clamp(2rem, 3.4vw, 3.05rem);
+  line-height: 1.04;
+}
+
+h2 {
+  font-size: 1.04rem;
+  line-height: 1.25;
+}
+
+h3 {
+  line-height: 1.25;
+}
+
+.eyebrow {
+  margin-bottom: 5px;
+  color: var(--teal);
+  font-size: 0.72rem;
+}
+
+.kpi-grid {
+  gap: 12px;
+  margin: 24px 0 18px;
+}
+
+.kpi,
+.panel {
+  border-color: var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.kpi {
+  min-height: 116px;
+  padding: 16px;
+}
+
+.kpi strong {
+  font-size: 1.58rem;
+  letter-spacing: 0;
+}
+
+.dashboard-grid {
+  grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.72fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.panel {
+  padding: 18px;
+  scroll-margin-top: 18px;
+}
+
+.panel-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(23, 32, 29, 0.075);
+}
+
+.data-panel,
+.index-panel,
+.policy-panel,
+.watchlist-panel,
+.yield-panel,
+.rebalance-panel,
+.kelowna-panel,
+.municipal-rates-panel {
+  gap: 14px;
+}
+
+.primary-button {
+  min-height: 40px;
+  height: auto;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #1b2723, #101815);
+  box-shadow: 0 10px 20px rgba(16, 24, 21, 0.12);
+}
+
+.text-button,
+.expand-toggle {
+  border-radius: 10px;
+  background: rgba(15, 118, 110, 0.09);
+  color: var(--teal);
+}
+
+.icon-button {
+  border-radius: 10px;
+}
+
+.data-badge,
+.signal-pill {
+  border: 1px solid rgba(23, 32, 29, 0.06);
+  background: rgba(23, 32, 29, 0.045);
+}
+
+.data-badge.positive,
+.signal-pill.positive {
+  background: rgba(33, 133, 95, 0.12);
+  color: var(--green);
+}
+
+.data-badge.negative,
+.signal-pill.negative {
+  background: rgba(198, 79, 79, 0.12);
+  color: var(--red);
+}
+
+.data-controls,
+.policy-uploader,
+.policy-summary,
+.watchlist-builder,
+.watch-performance,
+.yield-summary,
+.yield-controls,
+.yield-chart-card,
+.recommendation-grid > section,
+.control-surface,
+.model-summary > div,
+.index-card,
+.index-summary section,
+.regime-card,
+.kelowna-card,
+.kelowna-chart-card,
+.kelowna-insight-card,
+.rate-card,
+.forecast-card {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: none;
+}
+
+.data-controls,
+.policy-layout,
+.watchlist-workspace,
+.yield-grid,
+.yield-detail-grid,
+.rebalance-layout,
+.recommendation-grid,
+.kelowna-macro-detail {
+  gap: 14px;
+}
+
+.data-controls,
+.control-surface {
+  padding: 14px;
+}
+
+.file-drop {
+  border-radius: 8px;
+  background: rgba(15, 118, 110, 0.065);
+  border-color: rgba(15, 118, 110, 0.32);
+}
+
+input,
+select,
+.inline-input,
+.number-input,
+.table-select,
+.control-surface select,
+.data-controls input,
+.data-controls select,
+.watchlist-controls input,
+.watchlist-controls select,
+.yield-controls select,
+.policy-uploader input[type="password"] {
+  border-radius: 8px;
+}
+
+.inline-input:focus,
+.number-input:focus,
+.table-select:focus,
+.control-surface select:focus,
+.data-controls input:focus,
+.data-controls select:focus,
+.policy-uploader input:focus,
+.watchlist-controls input:focus,
+.watchlist-controls select:focus {
+  border-color: rgba(15, 118, 110, 0.46);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+}
+
+.chart-wrap {
+  height: 292px;
+  margin-top: 10px;
+}
+
+.index-grid {
+  grid-template-columns: repeat(5, minmax(128px, 1fr));
+  gap: 8px;
+}
+
+.index-card {
+  padding: 9px;
+}
+
+.index-sparkline {
+  height: 48px;
+}
+
+.table-wrap {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th,
+td {
+  padding: 11px 10px;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(251, 252, 251, 0.96);
+  backdrop-filter: blur(10px);
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(23, 32, 29, 0.018);
+}
+
+tbody tr:hover {
+  background: rgba(15, 118, 110, 0.055);
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ticker {
+  border-radius: 8px;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--teal);
+}
+
+.segmented {
+  border-radius: 10px;
+  background: rgba(23, 32, 29, 0.055);
+}
+
+.segmented button {
+  border-radius: 8px;
+}
+
+.allocation-layout,
+.risk-list,
+.regime-grid {
+  margin-top: 12px;
+}
+
+.watchlist,
+.regime-grid,
+.target-bars,
+.yield-bars,
+.breadth-bars {
+  gap: 10px;
+}
+
+.watch-card {
+  min-height: 88px;
+  border-radius: 8px;
+}
+
+.watch-search-results {
+  border-radius: 8px;
+}
+
+.watch-search-option {
+  border-radius: 6px;
+}
+
+.watch-performance-header strong {
+  font-size: 1.48rem;
+}
+
+#watchPerformanceChart {
+  height: 190px;
+}
+
+.yield-summary > div,
+.watch-metrics div,
+.policy-adjustments > div {
+  border-radius: 8px;
+}
+
+.yield-summary strong {
+  font-size: 1.32rem;
+}
+
+#yieldForecastChart {
+  min-height: 230px;
+}
+
+.kelowna-card {
+  min-height: 118px;
+}
+
+#kelownaMacroChart {
+  min-height: 190px;
+}
+
+.municipal-rates-grid,
+.public-rates-grid,
+.kelowna-macro-grid {
+  gap: 8px;
+}
+
+.rate-card strong,
+.kelowna-card strong {
+  font-size: 1.22rem;
+}
+
+.expand-toggle {
+  justify-self: start;
+  min-height: 34px;
+  margin-top: 10px;
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  font-size: 0.76rem;
+}
+
+.expand-toggle.is-expanded {
+  background: rgba(23, 32, 29, 0.055);
+  color: var(--ink);
+}
+
+.line-item-hidden {
+  display: none !important;
+}
+
+.bar-track,
+.yield-track,
+.breadth-bars i {
+  background: #e2e9e5;
+}
+
+.line-portfolio,
+.yield-forecast-line {
+  stroke: var(--teal);
+}
+
+.area-fill,
+.yield-forecast-band {
+  fill: rgba(15, 118, 110, 0.1);
+}
+
+.line-benchmark {
+  stroke: var(--amber);
+}
+
+@media (max-width: 1080px) {
+  body {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    gap: 16px;
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dashboard-grid,
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  main {
+    padding: 20px 14px;
+  }
+
+  .panel,
+  .kpi {
+    padding: 14px;
+  }
+
+  .dashboard-grid,
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chart-wrap {
+    height: 238px;
+  }
+
+  .index-grid {
+    grid-template-columns: 1fr;
+  }
+}
