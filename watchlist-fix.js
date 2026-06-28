@@ -495,7 +495,7 @@
 
   function init() {
     if (!$("#watchlistCards")) return;
-    if ($("#watchlistCards").children.length) return;
+    if (document.querySelector("#watchlistCards [data-watch-ticker]")) return;
     renderWatchlist();
     bind();
   }
