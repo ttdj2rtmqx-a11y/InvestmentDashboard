@@ -5,6 +5,7 @@
   const STORAGE_KEY = "investmentDeskWatchlistV1";
   const DATA_SETTINGS_KEY = "investmentDeskDataSettingsV1";
   const ALPHA_VANTAGE_URL = "https://www.alphavantage.co/query";
+  const YAHOO_CHART_READER_URL = "https://r.jina.ai/http://query1.finance.yahoo.com/v8/finance/chart";
   const MAX_ITEMS = 30;
   const SEARCH_DEBOUNCE_MS = 260;
   const defaults = [
@@ -86,6 +87,9 @@
   let searchTimer = null;
   let searchResults = [];
   let highlightedResult = 0;
+  let refreshInFlight = false;
+  let repairQueued = false;
+  const yahooSeriesCache = new Map();
   const $ = (selector) => document.querySelector(selector);
 
   function escapeHTML(value) {
@@ -149,6 +153,67 @@
     } catch {
       return "";
     }
+  }
+
+  function yahooSymbol(symbol) {
+    const normalized = String(symbol || "").trim().toUpperCase();
+    const cryptoSymbols = { BTC: "BTC-USD", ETH: "ETH-USD", SOL: "SOL-USD", ADA: "ADA-USD" };
+    return cryptoSymbols[normalized] || normalized.replace(".", "-");
+  }
+
+  function yahooReaderUrl(symbol, range = "1y", interval = "1d") {
+    const url = new URL(`${YAHOO_CHART_READER_URL}/${encodeURIComponent(yahooSymbol(symbol))}`);
+    url.searchParams.set("range", range);
+    url.searchParams.set("interval", interval);
+    return url;
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  async function fetchYahooReaderDailySeries(symbol, retry = true) {
+    const cacheKey = yahooSymbol(symbol);
+    if (yahooSeriesCache.has(cacheKey)) return yahooSeriesCache.get(cacheKey);
+    const response = await fetch(yahooReaderUrl(symbol));
+    const text = await response.text();
+    const jsonStart = text.indexOf('{"chart"');
+    if (jsonStart === -1) {
+      if (retry) {
+        await wait(350);
+        return fetchYahooReaderDailySeries(symbol, false);
+      }
+      throw new Error(`No delayed chart data returned for ${symbol}.`);
+    }
+    const payload = JSON.parse(text.slice(jsonStart).trim());
+    const result = payload.chart?.result?.[0];
+    const timestamps = result?.timestamp || [];
+    const quote = result?.indicators?.quote?.[0] || {};
+    const rows = (quote.close || [])
+      .map((close, index) => ({
+        date: new Date(Number(timestamps[index] || 0) * 1000).toISOString().slice(0, 10),
+        close: Number(close),
+      }))
+      .filter((row) => Number.isFinite(row.close) && row.close > 0);
+    if (!rows.length) {
+      if (retry) {
+        await wait(350);
+        return fetchYahooReaderDailySeries(symbol, false);
+      }
+      throw new Error(`No delayed chart data returned for ${symbol}.`);
+    }
+    yahooSeriesCache.set(cacheKey, rows);
+    return rows;
+  }
+
+  function quoteFromCandles(candles) {
+    const latest = candles.at(-1);
+    const previous = candles.at(-2) || latest;
+    return {
+      price: Number(latest.close),
+      change: previous?.close ? ((latest.close / previous.close - 1) * 100) || 0 : 0,
+      source: "Yahoo delayed",
+    };
   }
 
   function inferTypeFromSymbol(symbol, name = "") {
@@ -444,8 +509,63 @@
     setStatus(`${ticker} removed`);
   }
 
+  async function refreshWatchlistQuotes() {
+    if (refreshInFlight || !state.length) return;
+    refreshInFlight = true;
+    setStatus("Refreshing watched assets");
+
+    let refreshed = 0;
+    const updated = await Promise.all(state.map(async (item, index) => {
+      try {
+        const candles = await fetchYahooReaderDailySeries(item.ticker);
+        const quote = quoteFromCandles(candles);
+        refreshed += 1;
+        return normalizeItem({
+          ...item,
+          price: quote.price,
+          change: quote.change,
+          source: quote.source,
+          signal: quote.change >= 0 ? "Improving" : "Weakening",
+          series: candles.slice(-90).map((row) => row.close),
+        }, index);
+      } catch {
+        return item;
+      }
+    }));
+
+    state = updated;
+    saveWatchlist();
+    renderWatchlist();
+    setStatus(refreshed ? `Watchlist refreshed (${refreshed}/${state.length})` : "Watchlist refresh unavailable");
+    refreshInFlight = false;
+  }
+
+  function ensureInteractiveWatchlist() {
+    if (!$("#watchlistCards")) return;
+    if (document.querySelector("#watchlistCards [data-watch-ticker]")) return;
+    renderWatchlist();
+  }
+
+  function observeWatchlist() {
+    const cards = $("#watchlistCards");
+    if (!cards || cards.dataset.watchlistFixObserved) return;
+    cards.dataset.watchlistFixObserved = "true";
+    const observer = new MutationObserver(() => {
+      if (repairQueued) return;
+      repairQueued = true;
+      window.requestAnimationFrame(() => {
+        repairQueued = false;
+        ensureInteractiveWatchlist();
+      });
+    });
+    observer.observe(cards, { childList: true });
+  }
+
   function bind() {
     $("#addWatchItem")?.addEventListener("click", addWatchItem);
+    $("#refreshMarketData")?.addEventListener("click", () => {
+      window.setTimeout(refreshWatchlistQuotes, 600);
+    });
     $("#watchTicker")?.addEventListener("input", queueSearchResults);
     $("#watchTicker")?.addEventListener("keydown", (event) => {
       if (event.key === "ArrowDown" && searchResults.length) {
@@ -491,6 +611,7 @@
       renderWatchlist();
     });
     window.__investmentDeskWatchlistFixBound = true;
+    observeWatchlist();
   }
 
   function init() {
