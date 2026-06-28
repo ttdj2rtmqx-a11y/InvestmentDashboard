@@ -57,7 +57,7 @@ function testWatchlistBlankFallback() {
   const openHtml = read("open.html");
   const openMunicipal = read("open-municipal-rates.html");
   assert(watchlistFix.includes("window.__investmentDeskWatchlistFixBound"), "Watchlist fallback should use its own guard.");
-  assert(watchlistFix.includes('$("#watchlistCards").children.length'), "Watchlist fallback should only fill a blank monitor.");
+  assert(watchlistFix.includes('document.querySelector("#watchlistCards [data-watch-ticker]")'), "Watchlist fallback should replace stale non-interactive cards.");
   assert(openHtml.includes("watchlist-fix.js?v="), "Hosted launcher should refresh the watchlist fallback asset.");
   assert(openMunicipal.includes("watchlist-fix.js?v="), "Municipal launcher should refresh the watchlist fallback asset.");
 }
