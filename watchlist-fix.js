@@ -89,6 +89,7 @@
   let highlightedResult = 0;
   let refreshInFlight = false;
   let repairQueued = false;
+  let recoveryBound = false;
   const yahooSeriesCache = new Map();
   const $ = (selector) => document.querySelector(selector);
 
@@ -561,11 +562,19 @@
     observer.observe(cards, { childList: true });
   }
 
-  function bind() {
-    $("#addWatchItem")?.addEventListener("click", addWatchItem);
+  function bindRecovery() {
+    if (recoveryBound) return;
+    recoveryBound = true;
     $("#refreshMarketData")?.addEventListener("click", () => {
       window.setTimeout(refreshWatchlistQuotes, 600);
+      window.setTimeout(ensureInteractiveWatchlist, 3000);
+      window.setTimeout(ensureInteractiveWatchlist, 9000);
     });
+    observeWatchlist();
+  }
+
+  function bind() {
+    $("#addWatchItem")?.addEventListener("click", addWatchItem);
     $("#watchTicker")?.addEventListener("input", queueSearchResults);
     $("#watchTicker")?.addEventListener("keydown", (event) => {
       if (event.key === "ArrowDown" && searchResults.length) {
@@ -611,12 +620,15 @@
       renderWatchlist();
     });
     window.__investmentDeskWatchlistFixBound = true;
-    observeWatchlist();
+    bindRecovery();
   }
 
   function init() {
     if (!$("#watchlistCards")) return;
-    if (document.querySelector("#watchlistCards [data-watch-ticker]")) return;
+    if (document.querySelector("#watchlistCards [data-watch-ticker]")) {
+      bindRecovery();
+      return;
+    }
     renderWatchlist();
     bind();
   }
