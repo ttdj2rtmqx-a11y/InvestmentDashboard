@@ -59,6 +59,7 @@ function testWatchlistBlankFallback() {
   assert(watchlistFix.includes("window.__investmentDeskWatchlistFixBound"), "Watchlist fallback should use its own guard.");
   assert(watchlistFix.includes('document.querySelector("#watchlistCards [data-watch-ticker]")'), "Watchlist fallback should replace stale non-interactive cards.");
   assert(watchlistFix.includes("new MutationObserver"), "Watchlist fallback should recover if stale scripts overwrite the cards.");
+  assert(watchlistFix.includes("function bindRecovery()"), "Watchlist fallback should attach recovery without duplicating add/remove handlers.");
   assert(watchlistFix.includes("fetchYahooReaderDailySeries"), "Watchlist fallback should refresh quotes without an API key.");
   assert(openHtml.includes("watchlist-fix.js?v="), "Hosted launcher should refresh the watchlist fallback asset.");
   assert(openMunicipal.includes("watchlist-fix.js?v="), "Municipal launcher should refresh the watchlist fallback asset.");
