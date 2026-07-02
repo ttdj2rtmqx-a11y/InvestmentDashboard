@@ -44,6 +44,19 @@ function testDynamicLoaderGuards() {
   assert(policy.includes('script[src*="kelowna-macro.js"]'), "Kelowna macro loader should not duplicate an existing script tag.");
 }
 
+function testDocumentIntelligence() {
+  const html = read("index.html");
+  const intelligence = read("document-intelligence.js");
+  const openHtml = read("open.html");
+  assert(html.includes("policyDocumentList"), "Policy upload should show uploaded documents.");
+  assert(html.includes("statementDocumentList"), "Statement upload should show uploaded documents.");
+  assert(html.includes("optimizationDocumentEvidence"), "Rebalance model should explain document inputs.");
+  assert(intelligence.includes("function renderModelEvidence()"), "Document intelligence should explain model inputs.");
+  assert(intelligence.includes('document.querySelectorAll("#policyAdjustments > div").length > 0'), "Policy scanner should wait for extracted scan results.");
+  assert(intelligence.includes("fetchYahooReaderDailySeries") === false, "Document intelligence should stay scoped to documents.");
+  assert(openHtml.includes("document-intelligence.js?v="), "Hosted launcher should refresh document intelligence.");
+}
+
 function testWatchlistSearchFallback() {
   const enhancements = read("enhancements.js");
   assert(enhancements.includes("localSearchUniverse"), "Watchlist search needs a local no-key universe.");
@@ -83,6 +96,7 @@ const tests = [
   testDuplicateIds,
   testJavaScriptSyntax,
   testDynamicLoaderGuards,
+  testDocumentIntelligence,
   testWatchlistSearchFallback,
   testWatchlistBlankFallback,
   testYahooDelayedFallback,
