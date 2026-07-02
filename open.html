@@ -24,6 +24,10 @@
         }
         html = html.replace(/watchlist-fix\.js\?v=[^"]+/g, "watchlist-fix.js?v=" + version);
         html = html.replace(/enhancements\.js\?v=[^"]+/g, "enhancements.js?v=" + version);
+        html = html.replace(/document-intelligence\.js\?v=[^"]+/g, "document-intelligence.js?v=" + version);
+        if (!/document-intelligence\.js/.test(html)) {
+          html = html.replace("</body>", '<script src="document-intelligence.js?v=' + version + '"><\/script></body>');
+        }
         if (!/municipal-rates\.js/.test(html)) {
           html = html.replace("</body>", '<script src="municipal-rates.js?v=' + version + '"><\/script></body>');
         }
