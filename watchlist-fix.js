@@ -565,11 +565,12 @@
   function bindRecovery() {
     if (recoveryBound) return;
     recoveryBound = true;
-    $("#refreshMarketData")?.addEventListener("click", () => {
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest("#refreshMarketData")) return;
       window.setTimeout(refreshWatchlistQuotes, 600);
       window.setTimeout(ensureInteractiveWatchlist, 3000);
       window.setTimeout(ensureInteractiveWatchlist, 9000);
-    });
+    }, true);
     observeWatchlist();
   }
 
