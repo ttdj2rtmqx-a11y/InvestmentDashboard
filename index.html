@@ -195,6 +195,8 @@
                 <button class="primary-button" id="analyzePolicy">Scan policy</button>
                 <button class="text-button" id="applyPolicy">Apply parameters</button>
               </div>
+              <div class="document-upload-confirmation" id="policyUploadConfirmation">Awaiting policy upload</div>
+              <div class="uploaded-document-list" id="policyDocumentList" aria-label="Uploaded policy documents"></div>
             </section>
 
             <section class="policy-summary" aria-label="Policy analysis">
@@ -204,6 +206,16 @@
                 <small id="policySummary">Upload an investment policy statement, mandate, or guideline file to draft risk settings.</small>
               </div>
               <div class="policy-adjustments" id="policyAdjustments"></div>
+              <div class="document-intel-panel" id="policyScannerNarrative">
+                <span>Document scanner</span>
+                <strong>Ready to recognize policy constraints</strong>
+                <small>Scanned policy data will identify risk profile, cash reserve, concentration limits, trade thresholds, and mandate restrictions.</small>
+              </div>
+              <div class="document-intel-panel" id="policyModelImpact">
+                <span>Model impact</span>
+                <strong>No policy data applied yet</strong>
+                <small>Once applied, policy settings update the optimization model's risk profile, target cash, maximum position size, and rebalance threshold.</small>
+              </div>
             </section>
           </div>
         </article>
@@ -291,6 +303,18 @@
             <div class="statement-status">
               <span class="data-badge" id="statementStatus">No statement</span>
               <small id="statementSummary">Upload a brokerage or custodian statement to identify holdings, quantities, and market values.</small>
+            </div>
+            <div class="document-upload-confirmation" id="statementUploadConfirmation">Awaiting statement upload</div>
+            <div class="uploaded-document-list" id="statementDocumentList" aria-label="Uploaded investment statements"></div>
+            <div class="document-intel-panel" id="statementScannerNarrative">
+              <span>AI statement scanner</span>
+              <strong>Ready to recognize holdings</strong>
+              <small>The scanner looks for tickers, names, categories, quantities, prices, and market values before populating the portfolio.</small>
+            </div>
+            <div class="document-intel-panel" id="statementModelImpact">
+              <span>Model impact</span>
+              <strong>No statement data applied yet</strong>
+              <small>Imported holdings will replace editable positions, set category targets from the current risk profile, and rerun trade recommendations.</small>
             </div>
             <div class="statement-preview" id="statementPreview"></div>
           </div>
@@ -469,6 +493,14 @@
             </section>
           </div>
 
+          <section class="document-model-evidence" id="optimizationDocumentEvidence" aria-label="Optimization model document inputs">
+            <div class="subheader">
+              <h3>Document inputs used by model</h3>
+              <span id="documentEvidenceStatus">No documents applied</span>
+            </div>
+            <div class="document-impact-grid" id="optimizationDataUsed"></div>
+          </section>
+
           <div class="recommendation-grid">
             <section>
               <div class="subheader">
@@ -614,6 +646,7 @@
     <script src="municipal-rates.js?v=municipal-rates-1"></script>
     <script src="statement-import.js?v=statement-import-1"></script>
     <script src="kelowna-macro.js?v=kelowna-macro-1"></script>
+    <script src="document-intelligence.js?v=document-intel-1"></script>
     <script src="ui-polish.js?v=ui-polish-1"></script>
   </body>
 </html>
