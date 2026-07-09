@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opening Investment Dashboard</title>
+    <style>
+      body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fb;color:#111827}
+      main{display:grid;gap:10px;text-align:center;padding:28px}
+      strong{font-size:1.05rem}small{color:#667085;font-weight:700}
+    </style>
+  </head>
+  <body>
+    <main><strong>Opening Investment Dashboard</strong><small>Loading the latest hosted version...</small></main>
+    <script>
+      (async function () {
+        var version = "external-live-20260626-1-" + Date.now();
+        var hash = window.location.hash || "";
+        var response = await fetch("index.html?fresh=" + version, { cache: "no-store" });
+        var html = await response.text();
+        html = html.replace(/ui-polish\.css\?v=[^"]+/g, "ui-polish.css?v=" + version);
+        if (!/ui-polish\.css/.test(html)) {
+          html = html.replace("</head>", '<link rel="stylesheet" href="ui-polish.css?v=' + version + '" /></head>');
+        }
+        html = html.replace(/hero\.css\?v=[^"]+/g, "hero.css?v=" + version);
+        if (!/hero\.css/.test(html)) {
+          html = html.replace("</head>", '<link rel="stylesheet" href="hero.css?v=' + version + '" /></head>');
+        }
+        if (!/hero-topbar/.test(html)) {
+          var heroHeader = [
+            '<header class="topbar hero-topbar" id="overview" aria-label="Investment command center hero">',
+            '<img class="hero-image" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&amp;fit=crop&amp;w=1800&amp;q=80" alt="Analytics dashboard with market-style charts on a screen" />',
+            '<div class="hero-copy">',
+            '<p class="eyebrow">Professional trading dashboard</p>',
+            '<h1>Global Market Command Center</h1>',
+            '<blockquote>',
+            '<p>Control the process, not the market. Let discipline compound what prediction cannot.</p>',
+            '<cite>Investment Desk principle</cite>',
+            '</blockquote>',
+            '</div>',
+            '<div class="actions hero-actions">',
+            '<button class="icon-button" aria-label="Download report" title="Download report">↓</button>',
+            '<button class="primary-button" id="runRebalanceTop">Run Rebalance</button>',
+            '</div>',
+            '</header>'
+          ].join("");
+          var topbarPattern = /<header class="topbar">\s*<div>\s*<p class="eyebrow">Professional trading dashboard<\/p>\s*<h1>Global Market Command Center<\/h1>\s*<\/div>\s*<div class="actions">\s*<button class="icon-button" aria-label="Download report" title="Download report">↓<\/button>\s*<button class="primary-button" id="runRebalanceTop">Run Rebalance<\/button>\s*<\/div>\s*<\/header>/;
+          html = html.replace(topbarPattern, heroHeader);
+          html = html.replace('<section class="kpi-grid" id="overview"', '<section class="kpi-grid" id="portfolio-summary"');
+        }
+        html = html.replace(/watchlist-fix\.js\?v=[^"]+/g, "watchlist-fix.js?v=" + version);
+        html = html.replace(/enhancements\.js\?v=[^"]+/g, "enhancements.js?v=" + version);
+        html = html.replace(/document-intelligence\.js\?v=[^"]+/g, "document-intelligence.js?v=" + version);
+        if (!/document-intelligence\.js/.test(html)) {
+          html = html.replace("</body>", '<script src="document-intelligence.js?v=' + version + '"><\/script></body>');
+        }
+        if (!/municipal-rates\.js/.test(html)) {
+          html = html.replace("</body>", '<script src="municipal-rates.js?v=' + version + '"><\/script></body>');
+        }
+        html = html.replace(/ui-polish\.js\?v=[^"]+/g, "ui-polish.js?v=" + version);
+        if (!/ui-polish\.js/.test(html)) {
+          html = html.replace("</body>", '<script src="ui-polish.js?v=' + version + '"><\/script></body>');
+        }
+        document.open();
+        document.write(html);
+        document.close();
+        if (hash) window.setTimeout(function () { window.location.hash = hash; }, 0);
+      })().catch(function (error) {
+        document.body.innerHTML = "<main><strong>Could not open the dashboard.</strong><small>" + String(error.message || error) + "</small></main>";
+      });
+    </script>
+  </body>
+</html>
