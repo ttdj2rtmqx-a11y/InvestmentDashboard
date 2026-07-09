@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="watchlist.css?v=watchlist-fix-1" />
     <link rel="stylesheet" href="yield.css?v=yield-1" />
     <link rel="stylesheet" href="ui-polish.css?v=ui-polish-1" />
+    <link rel="stylesheet" href="hero.css?v=hero-1" />
   </head>
   <body>
     <aside class="sidebar" aria-label="Trading platform navigation">
@@ -42,18 +43,23 @@
     </aside>
 
     <main>
-      <header class="topbar">
-        <div>
+      <header class="topbar hero-topbar" id="overview" aria-label="Investment command center hero">
+        <img class="hero-image" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&amp;fit=crop&amp;w=1800&amp;q=80" alt="Analytics dashboard with market-style charts on a screen" />
+        <div class="hero-copy">
           <p class="eyebrow">Professional trading dashboard</p>
           <h1>Global Market Command Center</h1>
+          <blockquote>
+            <p>Control the process, not the market. Let discipline compound what prediction cannot.</p>
+            <cite>Investment Desk principle</cite>
+          </blockquote>
         </div>
-        <div class="actions">
+        <div class="actions hero-actions">
           <button class="icon-button" aria-label="Download report" title="Download report">↓</button>
           <button class="primary-button" id="runRebalanceTop">Run Rebalance</button>
         </div>
       </header>
 
-      <section class="kpi-grid" id="overview" aria-label="Portfolio and market summary">
+      <section class="kpi-grid" id="portfolio-summary" aria-label="Portfolio and market summary">
         <article class="kpi">
           <span>Net portfolio value</span>
           <strong id="totalValue">$428,940</strong>
@@ -637,16 +643,17 @@
       </section>
     </main>
 
-    <script src="script.js?v=performance-live-1"></script>
+    <script src="script.js?v=upload-sync-1"></script>
     <script src="policy.js?v=policy-ai-2"></script>
-    <script src="markets.js?v=live-data-1"></script>
-    <script src="yield.js?v=live-data-1"></script>
+    <script src="markets.js?v=upload-sync-1"></script>
+    <script src="yield.js?v=upload-sync-1"></script>
     <script src="watchlist-fix.js?v=watchlist-fix-2"></script>
     <script src="enhancements.js?v=index-refresh-1"></script>
     <script src="municipal-rates.js?v=municipal-rates-1"></script>
-    <script src="statement-import.js?v=statement-import-1"></script>
+    <script src="statement-import.js?v=upload-sync-1"></script>
     <script src="kelowna-macro.js?v=kelowna-macro-1"></script>
-    <script src="document-intelligence.js?v=document-intel-1"></script>
+    <script src="document-intelligence.js?v=upload-sync-1"></script>
+    <script src="upload-sync.js?v=upload-sync-1"></script>
     <script src="ui-polish.js?v=ui-polish-1"></script>
   </body>
 </html>
