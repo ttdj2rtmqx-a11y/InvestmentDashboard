@@ -22,11 +22,19 @@
         if (!/ui-polish\.css/.test(html)) {
           html = html.replace("</head>", '<link rel="stylesheet" href="ui-polish.css?v=' + version + '" /></head>');
         }
+        html = html.replace(/script\.js\?v=[^"]+/g, "script.js?v=" + version);
+        html = html.replace(/markets\.js\?v=[^"]+/g, "markets.js?v=" + version);
+        html = html.replace(/yield\.js\?v=[^"]+/g, "yield.js?v=" + version);
+        html = html.replace(/statement-import\.js\?v=[^"]+/g, "statement-import.js?v=" + version);
         html = html.replace(/watchlist-fix\.js\?v=[^"]+/g, "watchlist-fix.js?v=" + version);
         html = html.replace(/enhancements\.js\?v=[^"]+/g, "enhancements.js?v=" + version);
         html = html.replace(/document-intelligence\.js\?v=[^"]+/g, "document-intelligence.js?v=" + version);
         if (!/document-intelligence\.js/.test(html)) {
           html = html.replace("</body>", '<script src="document-intelligence.js?v=' + version + '"><\/script></body>');
+        }
+        html = html.replace(/upload-sync\.js\?v=[^"]+/g, "upload-sync.js?v=" + version);
+        if (!/upload-sync\.js/.test(html)) {
+          html = html.replace("</body>", '<script src="upload-sync.js?v=' + version + '"><\/script></body>');
         }
         if (!/municipal-rates\.js/.test(html)) {
           html = html.replace("</body>", '<script src="municipal-rates.js?v=' + version + '"><\/script></body>');
@@ -35,10 +43,37 @@
         if (!/ui-polish\.js/.test(html)) {
           html = html.replace("</body>", '<script src="ui-polish.js?v=' + version + '"><\/script></body>');
         }
+        var scriptSources = [];
+        html = html.replace(/<script\s+src="([^"]+)"\s*><\/script>/g, function (_match, src) {
+          scriptSources.push(src);
+          return '<script type="application/x-investment-script-placeholder" data-investment-script-placeholder="true" src="' + src + '"><\/script>';
+        });
+        function finishOpen() {
+          if (hash) window.setTimeout(function () { window.location.hash = hash; }, 0);
+        }
+        function activateExternalScripts(done) {
+          var placeholders = Array.prototype.slice.call(document.querySelectorAll("script[data-investment-script-placeholder]"));
+          var index = 0;
+          function next() {
+            if (index >= scriptSources.length) {
+              done();
+              return;
+            }
+            var placeholder = placeholders[index];
+            var newScript = document.createElement("script");
+            newScript.async = false;
+            newScript.onload = next;
+            newScript.onerror = next;
+            newScript.src = scriptSources[index++];
+            if (placeholder && placeholder.parentNode) placeholder.parentNode.replaceChild(newScript, placeholder);
+            else document.body.appendChild(newScript);
+          }
+          next();
+        }
         document.open();
         document.write(html);
         document.close();
-        if (hash) window.setTimeout(function () { window.location.hash = hash; }, 0);
+        activateExternalScripts(finishOpen);
       })().catch(function (error) {
         document.body.innerHTML = "<main><strong>Could not open the dashboard.</strong><small>" + String(error.message || error) + "</small></main>";
       });
