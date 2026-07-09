@@ -23,6 +23,7 @@
           html = html.replace("</head>", '<link rel="stylesheet" href="ui-polish.css?v=' + version + '" /></head>');
         }
         html = html.replace(/script\.js\?v=[^"]+/g, "script.js?v=" + version);
+        html = html.replace(/policy\.js\?v=[^"]+/g, "policy.js?v=" + version);
         html = html.replace(/markets\.js\?v=[^"]+/g, "markets.js?v=" + version);
         html = html.replace(/yield\.js\?v=[^"]+/g, "yield.js?v=" + version);
         html = html.replace(/statement-import\.js\?v=[^"]+/g, "statement-import.js?v=" + version);
